@@ -4,6 +4,13 @@
 #include <memolib/string.h>
 
 typedef struct {
-    string      title;
-    string      text;
-} memo;
+    String      title;
+    String      text;
+    String      str;
+} Memo;
+
+Memo    new_memo();
+Memo    make_memo(char* title, char* text);
+int     set_title(Memo* memo, char* title);
+int     set_text(Memo* memo, char* text);
+int     set_str(Memo* memo, char* str);

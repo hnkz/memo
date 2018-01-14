@@ -1,9 +1,6 @@
 #include <memolib/string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
-char* string_get_value(string str) {
+char* string_get_value(String str) {
     char* result;
 
     result = (char*)malloc(sizeof(char) * str.length + 1);
@@ -15,8 +12,8 @@ char* string_get_value(string str) {
     return result;
 }
 
-string new_string() {
-    string new_str;
+String new_string() {
+    String new_str;
 
     new_str.length = 0;
     new_str.value  = NULL;
@@ -24,7 +21,7 @@ string new_string() {
     return new_str;
 }
 
-int set_value(string* str, char* value) {
+int set_value(String* str, char* value) {
     size_t length   = strlen(value);
     str->length     = length;
 
@@ -39,15 +36,15 @@ int set_value(string* str, char* value) {
     }
 }
 
-string make_string(char *value) {
-    string new_str = new_string();
+String make_string(char *value) {
+    String new_str = new_string();
 
     set_value(&new_str, value);
 
     return new_str;
 }
 
-void free_string(string str) {
+void free_string(String str) {
     if(str.value != NULL) {
         free(str.value);
     }
