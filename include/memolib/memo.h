@@ -10,7 +10,9 @@ typedef struct {
 } Memo;
 
 Memo    new_memo();
-Memo    make_memo(char* title, char* text);
+Memo    make_memo(String title, String text);
 int     set_title(Memo* memo, char* title);
 int     set_text(Memo* memo, char* text);
 int     set_str(Memo* memo, char* str);
+void    free_memo(Memo memo);
+void    show_memo(Memo memo);

@@ -7,8 +7,9 @@ typedef struct {
     int     length;
 } String;
 
-char*   string_get_value(String str);
 String  new_string();
-int     set_value(String* str, char* char_str);
-String  make_string(char *value);
-void    free_string(String str);
+char*   get_str_value(String str);
+int     set_str_value(String* str, char* char_str);
+String  make_str(char *value);
+String  link_str(String str1, String str2);
+void    free_str(String str);

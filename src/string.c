@@ -1,6 +1,6 @@
 #include <memolib/string.h>
 
-char* string_get_value(String str) {
+char* get_str_value(String str) {
     char* result;
 
     result = (char*)malloc(sizeof(char) * str.length + 1);
@@ -21,14 +21,15 @@ String new_string() {
     return new_str;
 }
 
-int set_value(String* str, char* value) {
+int set_str_value(String* str, char* value) {
     size_t length   = strlen(value);
     str->length     = length;
 
-    str->value = (char*)malloc(sizeof(char) * length);
+    str->value = (char*)malloc(sizeof(char) * length + 1);
 
     if(str->value != NULL) {
         memcpy(str->value, value, length);
+        str->value[str->length] = '\0';
 
         return 1;
     } else {
@@ -36,15 +37,28 @@ int set_value(String* str, char* value) {
     }
 }
 
-String make_string(char *value) {
+String make_str(char *value) {
     String new_str = new_string();
 
-    set_value(&new_str, value);
+    set_str_value(&new_str, value);
 
     return new_str;
 }
 
-void free_string(String str) {
+String link_str(String str1, String str2) {
+    char*  head;
+    String str;
+
+    head = (char*)malloc(sizeof(char) * (str1.length + str2.length));
+    strcat(head, str1.value);
+    strcat(head, str2.value);
+
+    set_str_value(&str, head);
+
+    return str;
+}
+
+void free_str(String str) {
     if(str.value != NULL) {
         free(str.value);
     }

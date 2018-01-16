@@ -1,5 +1,5 @@
 CC      = gcc
-CFLAGS  = -Wall -MMD -MP
+CFLAGS  = -c -Wall -o
 LD      = gcc
 LDFLAGS = -o $(PROGRAM)
 LIBS	=
@@ -8,21 +8,20 @@ SRC_DIR = ./src
 OBJ_DIR = ./build
 CSRCS	= $(shell ls $(SRC_DIR)/*.c)
 OBJS	= $(subst $(SRC_DIR),$(OBJ_DIR), $(CSRCS:.c=.o))
-PROGRAM = memo
-DEPENDS = $(OBJS:.o=.d)
+PROGRAM = test
 
 all: $(PROGRAM)
 
-$(PROGRAM): $(OBJS) $(LIBSj)
+$(PROGRAM): $(OBJS) $(LIBS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@if [ ! -d $(OBJ_DIR) ]; then \
+	@if [ ! -d $(OBJ_DIR) ];then \
 		echo "mkdir -p $(OBJ_DIR)"; mkdir -p $(OBJ_DIR);\
 	fi
-	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
+	$(CC) $< $(INCLUDE) $(CFLAGS) $@
 
 clean:
-	rm $(OBJS) $(PROGRAM) $(DEPENDS)
+	rm $(OBJS) $(PROGRAM)
 
 .PHONY: all clean
