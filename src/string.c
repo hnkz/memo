@@ -22,8 +22,10 @@ String new_string() {
 }
 
 int set_str_value(String* str, char* value) {
-    size_t length   = strlen(value);
-    str->length     = length;
+    size_t length;
+
+    length      = strlen(value);
+    str->length = length;
 
     str->value = (char*)malloc(sizeof(char) * length + 1);
 
@@ -49,7 +51,7 @@ String link_str(String str1, String str2) {
     char*  head;
     String str;
 
-    head = (char*)malloc(sizeof(char) * (str1.length + str2.length));
+    head = (char*)malloc(sizeof(char) * (str1.length + str2.length + 2));
     strcat(head, str1.value);
     strcat(head, str2.value);
 
@@ -63,3 +65,22 @@ void free_str(String str) {
         free(str.value);
     }
 }
+
+int count_str(String str) {
+    int i;
+    int count;
+
+    count = 0;
+
+    for(i = 0; i < str.length; i++) {
+        if(str.value[i] & 0x80) {
+            i += 2;
+            count += 2;
+        } else{
+            count += 1;
+        }
+    }
+    return count;
+}
+
+
