@@ -82,5 +82,3 @@ int count_str(String str) {
     }
     return count;
 }
-
-

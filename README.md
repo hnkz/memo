@@ -15,3 +15,8 @@
 * ファイル書き込み
 * UI調整
 * 日付選択機能
+
+
+## インストほーほー
+
+* sudo apt-get install libncursesw5-dev

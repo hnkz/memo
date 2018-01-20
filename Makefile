@@ -2,12 +2,12 @@ CC      = gcc
 CFLAGS  = -c -Wall -o
 LD      = gcc
 LDFLAGS = -o $(PROGRAM)
-LIBS	=
+LIBS		= 
 INCLUDE = -I./include
 SRC_DIR = ./src
 OBJ_DIR = ./build
-CSRCS	= $(shell ls $(SRC_DIR)/*.c)
-OBJS	= $(subst $(SRC_DIR),$(OBJ_DIR), $(CSRCS:.c=.o))
+CSRCS		= $(shell ls $(SRC_DIR)/*.c)
+OBJS		= $(subst $(SRC_DIR),$(OBJ_DIR), $(CSRCS:.c=.o))
 PROGRAM = test
 
 all: $(PROGRAM)
