@@ -67,12 +67,14 @@ void free_memo(Memo* memo) {
     free_str(memo->update_time);
 }
 
+int cmp_memo_by_title(Memo memo1, Memo memo2) {
+    return strcmp(memo1.title.value, memo2.title.value);
+}
+
 void show_memo(Memo memo) {
     int i;
     int center;
     int count;
-    size_t title_len = memo.title.length;
-    size_t text_len  = memo.text.length;
 
     // 1ライン　60文字
     // for(i = 0; i < CHARS_PER_LINE / 2; i++)

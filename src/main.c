@@ -35,11 +35,27 @@ int main(){
     text  = make_str("EこれはテストテキストEである！！");
     memo5 = make_memo(title, text);
 
-    show_memo(memo1);
-    show_memo(memo2);
-    show_memo(memo3);
-    show_memo(memo4);
-    show_memo(memo5);
+    // show_memo(memo1);
+    // show_memo(memo2);
+    // show_memo(memo3);
+    // show_memo(memo4);
+    // show_memo(memo5);
+
+    Memos memos;
+    memos = new_memos();
+    add_memo(&memos, memo1);
+    add_memo(&memos, memo2);
+    add_memo(&memos, memo5);
+    add_memo(&memos, memo3);
+    add_memo(&memos, memo4);
+    remove_memo_by_title(&memos, memo5);
+    show_memos(memos);
+
+    free_memo(&memo1);
+    free_memo(&memo2);
+    free_memo(&memo3);
+    free_memo(&memo4);
+    free_memo(&memo5);
 
     return 0;
 }

@@ -28,5 +28,8 @@ int     set_text(Memo* memo, char* text);
 // メモのメモリ領域を解放
 void    free_memo(Memo* memo);
 
+// メモ同士を比べる
+int     cmp_memo_by_title(Memo memo1, Memo memo2);
+
 // メモを表示　色々と改良が必要
 void    show_memo(Memo memo);

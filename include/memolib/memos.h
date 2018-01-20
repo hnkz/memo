@@ -1,24 +1,28 @@
 #include <memolib/memo.h>
 
-typedef struct __Node {
-    Memo            memo;
-    struct __Node*  parent;
-    struct __Node*  right;
-    struct __Node*  left;
-} Node;
+typedef struct __Memos {
+    Memo  memo;
+    struct __Memos* next;
+    struct __Memos* before;
+} Memos;
 
-// 新しいノードを作成（使わないで）
-Node new_node();
+// 新しいメモを作成
+Memos new_memos();
 
-// メモからノードを作成
-Node make_node_by_memo(Memo memo);
+// メモを追加
+int   add_memo(Memos* memos, Memo memo);
 
-// ノードを追加
-Node add_node(Node tree, Node node);
+// メモを削除
+int   remove_memo_by_title(Memos* memos, Memo memo);
 
-// ノードの削除
-Node remove_node(Node tree, String str);
+// メモを変更
+int   edit_memo(Memos* memos, Memo memo);
 
+// メモを日時でソート
+int   sort_memo_by_date(Memos* memos);
 
-// ノードの検索（文字列から）
-Node search_node(Node tree, String str);
+// メモをタイトルでソート
+int   sort_memo_by_title(Memos* memos);
+
+// メモを表示
+void  show_memos(Memos memos);

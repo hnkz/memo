@@ -1,33 +1,67 @@
 #include <memolib/memos.h>
 
-Node new_node() {
-    Node node;
+Memos new_memos() {
+    Memos memos;
 
-    node.memo   = new_memo();
-    node.parent = NULL;
-    node.right  = NULL;
-    node.left   = NULL;
+    memos.memo      = new_memo();
+    memos.next      = NULL;
+    memos.before    = NULL;
 
-    return node;
+    return memos;
 }
 
-Node make_node_by_memo(Memo memo) {
-    Node node;
+int add_memo(Memos* memos, Memo memo) {
+    Memos* tmp;
 
-    node = new_node();
-    node.memo = memo;
+    if(memos->memo.title.value == NULL) {
+        memos->memo = memo;
+        return 0;
+    }
 
-    return node;
+    if(memos->next == NULL) {    
+        tmp         = malloc(sizeof(Memos));
+        *tmp        = new_memos();
+        tmp->memo   = memo;
+
+        memos->next = tmp;
+        tmp->before = memos;
+    } else {
+        add_memo(memos->next, memo);
+    }
+
+    return 0;
 }
 
-Node add_node(Node tree, Node node) {
-    Node result;
-
-    return result;
+int remove_memo_by_title(Memos* memos, Memo memo) {
+    
+    if(cmp_memo_by_title(memos->memo, memo) == 0){
+        memos->before->next = memos->next;
+        memos->next->before = memos->before;
+    } else {
+        if(memos->next == NULL)
+            return 1;
+        remove_memo_by_title(memos->next, memo);
+    }
+    return 0;
 }
 
-Node remove_node(Node tree, String str) {
-    Node result;
+int edit_memo(Memos* memos, Memo meom) {
+    return 0;
+}
 
-    return result;
+int sort_memo_by_date(Memos* memos) {
+    return 0;
+}
+
+int sort_memo_by_title(Memos* memo) {
+    return 0;
+}
+
+void show_memos(Memos memos) {
+    do
+    {
+        show_memo(memos.memo);
+        memos = *memos.next;
+    } while (memos.next != NULL);
+    show_memo(memos.memo);
 }
