@@ -67,23 +67,32 @@ void print_start_window() {
     while (1) {
         // メニューを表示
         show_menu();
+        //if(selected_memos->next != NULL)
+        
+        if(selected_memos->prev != NULL)
+            printw("%s->", selected_memos->prev->memo.title.value);
+        printw("[%s]", selected_memos->memo.title.value);
+        if(selected_memos->next != NULL)
+            printw("->%s", selected_memos->next->memo.title.value);
 
         key = getch();
         if (key == 'q') break;
         switch(key) {
             case KEY_UP:
             case 'k':
-                if(selected_memos->prev != NULL)
+                if(selected_memos->prev != NULL) {
                     selected_memos = selected_memos->prev;
-                if(memo_status > 0)
-                    memo_status -= 1;
+                    if(memo_status > 0)
+                        memo_status -= 1;
+                }
                 break;
             case KEY_DOWN:
             case 'j':
-                if(selected_memos->next != NULL)
+                if(selected_memos->next != NULL) {
                     selected_memos = selected_memos->next;
-                if(memo_status < MAX_SHOW_MEMOS - 1)
-                    memo_status += 1;
+                    if(memo_status < MAX_SHOW_MEMOS - 1)
+                        memo_status += 1;
+                }
                 break;
             case KEY_LEFT:
             case 'h':
@@ -144,11 +153,8 @@ void print_add_memo_window() {
 }
 
 void print_remove_memo_window() {
-    Memos* remove_memos;
+    
     clear();
-
-    remove_memos = selected_memos;
-
     show_memo(selected_memos->memo);
     printw("\nこのメモを削除しますか？(y/n)");
     refresh();
@@ -156,11 +162,12 @@ void print_remove_memo_window() {
     while(1){
         key = getch();
         if(key == 'y'){
-            if(remove_memos->prev == NULL && remove_memos->next != NULL)
-                list_top = *remove_memos->next;
-            remove_memo(remove_memos);
+            if(selected_memos->prev == NULL && selected_memos->next != NULL)
+                list_top = *selected_memos->next;
+            remove_memo(selected_memos);
             selected_memos = &list_top;
-            memo_num -= 1;
+            memo_status = 0;
+            memo_num    -= 1;
             break;
         } else if(key == 'n'){
             break;

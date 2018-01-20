@@ -39,6 +39,7 @@ int add_memo(Memos* memos, Memo memo) {
     }
 
     tmp         = malloc(sizeof(Memos));
+    *tmp        = new_memos();
     tmp->memo   = memo;
 
     if(memos->next == NULL) {
@@ -65,13 +66,16 @@ int remove_memo(Memos* memos) {
         } else {
             tmp->prev->next = NULL;
         }
+        free(tmp);
     } else {
         if(tmp->next != NULL) {
             tmp->next->prev = NULL;
             tmp = tmp->next;
+        } else {
+            *tmp = new_memos();
         }
     }
-    free(memos);
+        
     return 0;
 }
 
