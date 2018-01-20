@@ -6,7 +6,7 @@ Memos new_memos() {
 
     memos.memo      = new_memo();
     memos.next      = NULL;
-    memos.prev    = NULL;
+    memos.prev      = NULL;
 
     return memos;
 }
@@ -46,9 +46,9 @@ int add_memo(Memos* memos, Memo memo) {
         memos->next = tmp;
         tmp->prev = memos;
     } else {
-        tmp->prev         = memos;
+        tmp->prev           = memos;
         tmp->next           = memos->next;
-        memos->next->prev = tmp;
+        memos->next->prev   = tmp;
         memos->next         = tmp;
     }
 
@@ -57,6 +57,12 @@ int add_memo(Memos* memos, Memo memo) {
 
 int remove_memo(Memos* memos) {
     Memos* tmp;
+
+    // if(memos->prev != NULL)
+    //     printw("%s->", memos->prev->memo.title.value);
+    // printw("[%s]", memos->memo.title.value);
+    // if(memos->next != NULL)
+    //     printw("->%s", memos->next->memo.title.value);
 
     tmp = memos;
     if(tmp->prev != NULL) {
@@ -68,11 +74,12 @@ int remove_memo(Memos* memos) {
         }
         free(tmp);
     } else {
-        if(tmp->next != NULL) {
-            tmp->next->prev = NULL;
-            tmp = tmp->next;
+        if(memos->next != NULL) {
+            memos       = memos->next;
+            memos->prev = NULL;
+            free(tmp);
         } else {
-            *tmp = new_memos();
+            *memos = new_memos();
         }
     }
         

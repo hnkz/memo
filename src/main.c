@@ -10,7 +10,7 @@ void    show_menu();
 void    print_start_window();
 void    execute_menu();
 
-Memos   list_top;
+Memos*  list_top;
 Memos*  selected_memos;
 int     x, y, w, h;
 int     menu_status;
@@ -69,11 +69,19 @@ void print_start_window() {
         show_menu();
         //if(selected_memos->next != NULL)
         
-        if(selected_memos->prev != NULL)
-            printw("%s->", selected_memos->prev->memo.title.value);
-        printw("[%s]", selected_memos->memo.title.value);
-        if(selected_memos->next != NULL)
-            printw("->%s", selected_memos->next->memo.title.value);
+        // Memos* tmp;
+        // tmp = &list_top;
+        // while(tmp->next != NULL && tmp->memo.title.value != NULL) {
+        //     printw("%s->", tmp->memo.title.value);
+        //     tmp = tmp->next;
+        // }
+        // if(tmp->memo.title.value != NULL)
+        //     printw("%s->", tmp->memo.title.value);
+        // if(selected_memos->prev != NULL)
+        //     printw("%s->", selected_memos->prev->memo.title.value);
+        // printw("[%s]", selected_memos->memo.title.value);
+        // if(selected_memos->next != NULL)
+        //     printw("->%s", selected_memos->next->memo.title.value);
 
         key = getch();
         if (key == 'q') break;
@@ -143,7 +151,11 @@ void print_add_memo_window() {
 
     memo = make_memo(title, text);
 
-    add_memo(selected_memos, memo);
+    if(list_top->memo.title.value == NULL) {
+        add_memo(list_top, memo);
+    } else {
+        add_memo(selected_memos, memo);
+    }
 
     memo_num += 1;
 
@@ -162,10 +174,15 @@ void print_remove_memo_window() {
     while(1){
         key = getch();
         if(key == 'y'){
-            if(selected_memos->prev == NULL && selected_memos->next != NULL)
-                list_top = *selected_memos->next;
+            if(selected_memos->prev == NULL){
+                if(selected_memos->next != NULL) {
+                    list_top = list_top->next;
+                    list_top->prev = NULL;
+                } else {
+
+                }
+            }
             remove_memo(selected_memos);
-            selected_memos = &list_top;
             memo_status = 0;
             memo_num    -= 1;
             break;
@@ -173,7 +190,7 @@ void print_remove_memo_window() {
             break;
         }
     }
-    selected_memos = &list_top;
+    selected_memos = list_top;
 }
 
 void print_edit_memo_window() {
@@ -256,21 +273,22 @@ int main(){
     menu_status = 0;
     memo_status = 0;
     memo_num    = 0;
-    setlocale(LC_ALL, ""); // 日本語
+    setlocale(LC_ALL, "");// 日本語
     initscr();
     start_color();
     init_pair(1, COLOR_BLACK, COLOR_WHITE);
     init_pair(2, COLOR_WHITE, COLOR_BLACK);
     use_default_colors();
-    noecho(); // 入力見えないように
+    noecho();// 入力見えないように
     cbreak();
     keypad(stdscr, TRUE);
     getmaxyx(stdscr, h, w);
     curs_set(0);
     clear();
 
-    list_top        = new_memos();
-    selected_memos  = &list_top;
+    list_top         = malloc(sizeof(Memos));
+    *list_top        = new_memos();
+    selected_memos   = list_top;
 
     // 画面の初期化
     print_start_window();
