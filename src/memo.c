@@ -89,32 +89,16 @@ void show_memo(Memo memo) {
     int count;
 
     // 1ライン　60文字
-    // for(i = 0; i < CHARS_PER_LINE / 2; i++)
-    //     printf("--");
-    // printf(" タイトル ");
-    // for(i = 0; i < CHARS_PER_LINE / 2; i++)
-    //     printf("--");
-    // printf("\n");
-
     // タイトル
     center = CHARS_PER_LINE - (count_str(memo.title) / 2);
     for(i = 0; i < center; i++)
-        addstr(" ");
-    // for(i = 0; i < memo.title.length; i++) {
-    //     // 改行処理
-    //     if(count > 50) {
-    //         count = 0;
-    //         printf("\n");
-    //         // センタリング
-    //         for(i = 0; i < center; i++)
-    //             printf(" ");
-    //     }
-    //     putchar(memo.title.value[i]);
-    //     count++;
-    // }
+        printw(" ");
+
     printw("%s", memo.title.value);
     for(i = 0; i < center+1; i++)
-        addstr(" ");
+        printw(" ");
+    if(!(count_str(memo.title) % 2))
+        printw(" ");
     printw("\n|");
     // 本文
     for(i = 0; i < CHARS_PER_LINE; i++)

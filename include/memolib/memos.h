@@ -31,16 +31,10 @@ Memo pop_memo(MemoStack* stack);
 int   add_memo(Memos* memos, Memo memo);
 
 // メモを削除
-int   remove_memo_by_title(Memos* memos, Memo memo);
+int   remove_memo(Memos* memos);
 
 // メモを変更
 int   edit_memo(Memos* memos, Memo memo);
-
-// メモを日時でソート
-int   sort_memo_by_date(Memos* memos);
-
-// メモをタイトルでソート
-int   sort_memo_by_title(Memos* memos);
 
 // メモをタイトルで検索 複数場合は線形リストで
 Memos search_memo_by_title(Memos* memos);
@@ -53,3 +47,6 @@ void  show_memos(Memos memos);
 
 // 選択状態でメモを表示
 void  show_memos_with_select(Memos memos, int num);
+
+// メモリ領域を解放
+void  free_memos(Memos* memos);

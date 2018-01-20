@@ -38,48 +38,29 @@ int add_memo(Memos* memos, Memo memo) {
         return 0;
     }
 
-    // 日付順で追加
-    // if(cmp_memo_by_date(memos.memo, memo) < 0) {
-    //     if(memos->next == NULL) {
-    //         tmp         = malloc(sizeof(Memos));
-    //         *tmp        = new_memos();
-    //         tmp->memo   = memo;
+    tmp         = malloc(sizeof(Memos));
+    *tmp        = new_memos();
+    tmp->memo   = memo;
 
-    //         memos->before   = tmp;
-    //         tmp->next       = memos;
-    //     } else {
-    //         add_memo(memos->next, memo);
-    //     }
-    // } else if (cmp_memo_by_date(memos.memo, memo) >= 0) {
-    //     if(memos->next == NULL) {
-
-    //     }
-    // }
-
-    if(memos->next == NULL) {    
-        tmp         = malloc(sizeof(Memos));
-        *tmp        = new_memos();
-        tmp->memo   = memo;
-
+    if(memos->next == NULL) {
         memos->next = tmp;
         tmp->before = memos;
     } else {
-        add_memo(memos->next, memo);
+        tmp->before         = memos;
+        tmp->next           = memos->next;
+        memos->next->before = tmp;
+        memos->next         = tmp;
     }
 
     return 0;
 }
 
-int remove_memo_by_title(Memos* memos, Memo memo) {
-    
-    if(cmp_memo_by_title(memos->memo, memo) == 0){
+int remove_memo(Memos* memos) {
+    if(memos->before != NULL)
         memos->before->next = memos->next;
+    if(memos->next != NULL)
         memos->next->before = memos->before;
-    } else {
-        if(memos->next == NULL)
-            return 1;
-        remove_memo_by_title(memos->next, memo);
-    }
+    free_memos(memos);
     return 0;
 }
 
@@ -137,4 +118,8 @@ void show_memos_with_select(Memos memos, int num) {
         }
         show_memo(next_memos->memo);
     }
+}
+
+void free_memos(Memos* memos) {
+    free_memo(&memos->memo);
 }
