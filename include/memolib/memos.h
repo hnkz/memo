@@ -24,7 +24,7 @@ int   sort_memo_by_date(Memos* memos);
 // メモをタイトルでソート
 int   sort_memo_by_title(Memos* memos);
 
-// メモをタイトルで検索
+// メモをタイトルで検索 複数場合は線形リストで
 Memos search_memo_by_title(Memos* memos);
 
 // メモを日付で検索
