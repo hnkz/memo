@@ -24,5 +24,11 @@ int   sort_memo_by_date(Memos* memos);
 // メモをタイトルでソート
 int   sort_memo_by_title(Memos* memos);
 
+// メモをタイトルで検索
+Memos search_memo_by_title(Memos* memos);
+
+// メモを日付で検索
+Memos search_memo_by_date(Memos* memos);
+
 // メモを表示
 void  show_memos(Memos memos);
