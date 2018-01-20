@@ -13,10 +13,29 @@ Memos new_memos() {
 int add_memo(Memos* memos, Memo memo) {
     Memos* tmp;
 
+    // メモがまだ一つもなかったら
     if(memos->memo.title.value == NULL) {
         memos->memo = memo;
         return 0;
     }
+
+    // 日付順で追加
+    // if(cmp_memo_by_date(memos.memo, memo) < 0) {
+    //     if(memos->next == NULL) {
+    //         tmp         = malloc(sizeof(Memos));
+    //         *tmp        = new_memos();
+    //         tmp->memo   = memo;
+
+    //         memos->before   = tmp;
+    //         tmp->next       = memos;
+    //     } else {
+    //         add_memo(memos->next, memo);
+    //     }
+    // } else if (cmp_memo_by_date(memos.memo, memo) >= 0) {
+    //     if(memos->next == NULL) {
+
+    //     }
+    // }
 
     if(memos->next == NULL) {    
         tmp         = malloc(sizeof(Memos));

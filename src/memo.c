@@ -15,6 +15,7 @@ Memo new_memo() {
     memo.text           = new_string();
     memo.make_time      = make_str(make_time);
     memo.update_time    = make_str(update_time);
+    memo.make_time_num  = t;
 
     return memo;
 }
@@ -69,6 +70,15 @@ void free_memo(Memo* memo) {
 
 int cmp_memo_by_title(Memo memo1, Memo memo2) {
     return strcmp(memo1.title.value, memo2.title.value);
+}
+
+int cmp_memo_by_date(Memo memo1, Memo memo2) {
+    if(memo1.make_time_num == memo2.make_time_num)
+        return 0;
+    else if(memo1.make_time_num > memo2.make_time_num)
+        return 1;
+    else 
+        return -1;
 }
 
 void show_memo(Memo memo) {
