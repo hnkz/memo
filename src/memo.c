@@ -1,4 +1,6 @@
 #include <memolib/memo.h>
+#include <curses.h>
+
 
 Memo new_memo() {
     Memo    memo;
@@ -95,10 +97,9 @@ void show_memo(Memo memo) {
     // printf("\n");
 
     // タイトル
-    printf("\033[1m");
     center = CHARS_PER_LINE - (count_str(memo.title) / 2);
     for(i = 0; i < center; i++)
-        printf(" ");
+        addstr(" ");
     // for(i = 0; i < memo.title.length; i++) {
     //     // 改行処理
     //     if(count > 50) {
@@ -111,32 +112,34 @@ void show_memo(Memo memo) {
     //     putchar(memo.title.value[i]);
     //     count++;
     // }
-    printf("\033[1m%s\033[0m\n|", memo.title.value);
-
+    printw("%s", memo.title.value);
+    for(i = 0; i < center+1; i++)
+        addstr(" ");
+    printw("\n|");
     // 本文
     for(i = 0; i < CHARS_PER_LINE; i++)
-        printf("––");
+        printw("––");
 
-    printf("|\n|");
+    printw("|\n|");
 
-    printf(" ");
-    printf("%s", memo.text.value);
+    printw(" ");
+    printw("%s", memo.text.value);
     count = CHARS_PER_LINE * 2 - (count_str(memo.text) + 1);
     for(i = 0; i < count; i++)
-        printf(" ");
-    printf("|\n|");
+        printw(" ");
+    printw("|\n|");
 
     // 日時
     for(i = 0; i < CHARS_PER_LINE; i++)
-        printf("––");
-    printf("|\n| 作成: %s 更新: %s", memo.make_time.value, memo.update_time.value);
+        printw("––");
+    printw("|\n| 作成: %s 更新: %s", memo.make_time.value, memo.update_time.value);
     count = CHARS_PER_LINE * 2 - (14 + count_str(memo.make_time) + count_str(memo.update_time));
     for(i = 0; i < count; i++)
-        printf(" ");
-    printf("|\n|");
+        printw(" ");
+    printw("|\n|");
 
     // 最後のライン
     for(i = 0; i < CHARS_PER_LINE; i++)
-        printf("––");
-    printf("|\n\n");
+        printw("––");
+    printw("|\n\n");
 }

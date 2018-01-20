@@ -1,4 +1,5 @@
 #include <memolib/memos.h>
+#include <curses.h>
 
 Memos new_memos() {
     Memos memos;
@@ -8,6 +9,24 @@ Memos new_memos() {
     memos.before    = NULL;
 
     return memos;
+}
+
+MemoStack new_memo_stack() {
+    MemoStack stack;
+
+    stack.num = 0;
+
+    return stack;
+}
+
+int push_memo(MemoStack* stack, Memo memo) {
+    stack->memo[(stack->num)++] = memo;
+
+    return 0;
+}
+
+Memo pop_memo(MemoStack* stack) {
+    return stack->memo[--(stack->num)];
 }
 
 int add_memo(Memos* memos, Memo memo) {
@@ -77,10 +96,45 @@ int sort_memo_by_title(Memos* memo) {
 }
 
 void show_memos(Memos memos) {
-    do
-    {
+    int i;
+    for(i = 0; i < 3 && memos.next != NULL; i++) {
         show_memo(memos.memo);
         memos = *memos.next;
-    } while (memos.next != NULL);
+    }
     show_memo(memos.memo);
+}
+
+void show_memos_with_select(Memos memos, int num) {
+    int i;
+    Memos*      next_memos;
+    Memos*      before_memos;
+    MemoStack   stack;
+
+    next_memos      = memos.next;
+    before_memos    = memos.before;
+    stack           = new_memo_stack();
+
+    if(before_memos != NULL) {
+        for(i = 0; i < num - 1 && before_memos->before != NULL; i++) {
+            push_memo(&stack, before_memos->memo);
+            before_memos = before_memos->before;
+        }
+        push_memo(&stack, before_memos->memo);
+
+        for(i = stack.num; i > 0; i--) {
+            show_memo(pop_memo(&stack));
+        }
+    }
+    if(memos.memo.title.value != NULL) {
+        attrset(COLOR_PAIR(1));
+        show_memo(memos.memo);
+        attrset(COLOR_PAIR(2));
+    }
+    if(next_memos != NULL) {
+        for(i = 0; i < MAX_SHOW_MEMOS - num - 1 && next_memos->next != NULL; i++) {
+            show_memo(next_memos->memo);
+            next_memos = next_memos->next;
+        }
+        show_memo(next_memos->memo);
+    }
 }

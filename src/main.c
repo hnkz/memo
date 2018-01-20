@@ -1,99 +1,185 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
+#include <curses.h>
+#include <locale.h>
 
 #include <memolib/memos.h>
 
-#define clr()           printf("\033[2J") // 画面をクリア
-#define clr_right       printf("\033[0K") //カーソル位置からその行の右端までをクリア
-#define clr_left        printf("\033[1K") //カーソル位置からその行の左端までをクリア
-#define clr_line        printf("\033[2K") //カーソル位置の行をクリア
-#define location(x,y)   printf("\033[%d;%dH" ,y,x) //カーソル位置を移動
-#define right(x)        printf("\033[%dC" ,x) //カーソルを指定数だけ右に移動
-#define left(x)         printf("\033[%dD" ,x) //カーソルを指定数だけ左に移動
-#define down(x)         printf("\033[%dB" ,x) //カーソルを指定数だけ下に移動
-#define up(x)           printf("\033[%dA" ,x) //カーソルを指定数だけ上に移動
+void    show_menu();
+void    print_start_window();
+void    execute_menu();
 
-#define black_char()    printf("\033[30m") //黒の文字に変更
-#define red_char()      printf("\033[31m") //赤の文字に変更
-#define green_char()    printf("\033[32m") //緑の文字に変更
-#define yellow_char()   printf("\033[33m") //黄色の文字に変更
-#define blue_char()     printf("\033[34m") //青の文字に変更
-#define mazenda_char()  printf("\033[35m") //マゼンダの文字に変更
-#define syan_char()     printf("\033[36m") //シアンの文字に変更
-#define white_char()    printf("\033[37m") //白の文字に変更
-#define normal_char()   printf("\033[39m") //文字の色を通常の色に戻す
+Memos   root;
+Memos*  next_memos;
+int     x, y, w, h;
+int     menu_status;
+int     memo_status;
+int     key;
 
-#define black_ground()  printf("\033[40m") //文字の背景を黒色に変更
-#define red_ground()    printf("\033[41m") //文字の背景を赤色に変更
-#define green_ground()  printf("\033[42m") //文字の背景を緑色に変更
-#define white_ground()  printf("\033[47m") //文字の背景を白色に変更
-#define normal_ground() printf("\033[49m") //文字の背景を通常に変更
+char*  menus[] = {
+    "メモを追加",
+    "メモを削除",
+    "メモを編集",
+    "メモを検索"
+};
 
-// 文字列を選択状態にする
-#define select_chars(a) \
-    black_char();white_ground(); \
-    printf("%s",a); \
-    normal_char();normal_ground()
+int menu_size = sizeof(menus)/sizeof(char *);
 
-int get_window_width() {
-    struct winsize ws;
+void show_menu() {
+    int i;
 
-    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) != -1) {
-        return ws.ws_col;
+    clear();
+    y = 0;
+    x = 0;
+
+    show_memos_with_select(*next_memos, memo_status);
+
+    y = h-1;
+    x = 0;
+    move(y, x);
+
+
+    for(i = 0; i < menu_size; i++) {
+        if(i == menu_status) {
+            attrset(COLOR_PAIR(1));
+            printw(menus[i]);
+            attrset(COLOR_PAIR(2));
+        } else {
+            printw(menus[i]);
+        }
+        printw(" ");
     }
 
-    return -1;
-}
-
-int get_window_height() {
-    struct winsize ws;
-
-    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) != -1) {
-        return ws.ws_row;
-    }
-
-    return -1;
+    refresh();
 }
 
 void print_start_window() {
-    int win_row;
-    win_row = get_window_height();
+    while (1) {
+        show_menu();
 
-    clr();
-    location(0, win_row);
+        key = getch();
+        if (key == 'q') break;
+        switch(key) {
+            case KEY_UP:
+                if(next_memos->before != NULL)
+                    next_memos = next_memos->before;
+                if(memo_status > 0)
+                    memo_status -= 1;
+                break;
+            case KEY_DOWN:
+                if(next_memos->next != NULL)
+                    next_memos = next_memos->next;
+                if(memo_status < 3)
+                    memo_status += 1;
+                break;
+            case KEY_LEFT:
+                if(menu_status == 0)
+                    menu_status = menu_size-1;
+                else 
+                    menu_status -= 1;
+                break;
+            case KEY_RIGHT:
+                if(menu_status == menu_size-1)
+                    menu_status = 0;
+                else
+                    menu_status += 1;
+                break;
+            case '\n':
+                execute_menu();
+                break;
+            case 'h':
 
-    // 選択状態
-    select_chars("メモを追加");
+                break;
+            default:
 
-    printf(" ");
-
-    printf("メモを削除");
-
-    printf(" ");
-
-    printf("メモを編集");
-
-    printf("\n");
-
-    // メニュー選択待ち
-    while(1) {
-        if(kbhit()) {
-            c = getch();
-            printf("Key:0x%02X\n", c & 0xff);
+                break;
         }
     }
 }
 
+void execute_menu() {
+    
+}
+
 int main(){
     // 基本はrootでメモを管理
-    Memos root;
+    // 初期化処理
+    menu_status = 0;
+    memo_status = 0;
+    setlocale(LC_ALL, ""); // 日本語
+    initscr();
+    start_color();
+    init_pair(1, COLOR_BLACK, COLOR_WHITE);
+    init_pair(2, COLOR_WHITE, COLOR_BLACK);
+    bkgd(COLOR_PAIR(2));
+    noecho();
+    cbreak();
+    keypad(stdscr, TRUE);
+    getmaxyx(stdscr, h, w);
+    curs_set(0);
+    clear();
+
+    // memo test
+    Memo memo1;
+    String title = make_str("A");
+    String text  = make_str("Aこれはテストテキストである！！");
+    memo1 = make_memo(title, text);
+
+    Memo memo2;
+    title = make_str("B");
+    text  = make_str("BこれはテストテキストBである！！");
+    memo2 = make_memo(title, text);
+
+    Memo memo3;
+    title = make_str("C");
+    text  = make_str("CこれはテストテキストCである！！");
+    memo3 = make_memo(title, text);
+
+    Memo memo4;
+    title = make_str("D");
+    text  = make_str("DこれはテストテキストDである！！");
+    memo4 = make_memo(title, text);
+
+    Memo memo5;
+    title = make_str("E");
+    text  = make_str("EこれはテストテキストEである！！");
+    memo5 = make_memo(title, text);
+
+    Memo memo6;
+    title = make_str("F");
+    text  = make_str("FこれはテストテキストFである！！");
+    memo6 = make_memo(title, text);
+
+    Memo memo7;
+    title = make_str("G");
+    text  = make_str("GこれはテストテキストGである！！");
+    memo7 = make_memo(title, text);
+
+    Memo memo8;
+    title = make_str("H");
+    text  = make_str("HこれはテストテキストHである！！");
+    memo8 = make_memo(title, text);
+
+
+    root        = new_memos();
+    next_memos  = &root;
+    add_memo(&root, memo1);
+    add_memo(&root, memo2);
+    add_memo(&root, memo3);
+    add_memo(&root, memo4);
+    add_memo(&root, memo5);
+    // add_memo(&root, memo6);
+    // add_memo(&root, memo7);
+    // add_memo(&root, memo8);
+
+
+    //remove_memo_by_title(&root, memo5);
 
     // 画面の初期化
     print_start_window();
 
+    endwin();
     return 0;
 }
 
