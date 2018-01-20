@@ -40,7 +40,6 @@ void show_menu() {
     show_memos_with_select(*selected_memos, memo_status);
 
     // メニューを表示
-
     // 一番下にカーソルを合わせる
     y = h-1;
     x = 0;
@@ -48,9 +47,9 @@ void show_menu() {
 
     for(i = 0; i < menu_size; i++) {
         if(i == menu_status) {
-            attrset(COLOR_PAIR(1));
+            attrset(COLOR_PAIR(0) | A_REVERSE);
             printw(menus[i]);
-            attrset(COLOR_PAIR(2));
+            attrset(COLOR_PAIR(0));
         } else {
             printw(menus[i]);
         }
@@ -157,9 +156,9 @@ void print_remove_memo_window() {
     while(1){
         key = getch();
         if(key == 'y'){
+            if(remove_memos->prev == NULL && remove_memos->next != NULL)
+                list_top = *remove_memos->next;
             remove_memo(remove_memos);
-            if(remove_memos->prev == NULL && remove_memos->next == NULL)
-                list_top = new_memos();
             selected_memos = &list_top;
             memo_num -= 1;
             break;
@@ -255,7 +254,7 @@ int main(){
     start_color();
     init_pair(1, COLOR_BLACK, COLOR_WHITE);
     init_pair(2, COLOR_WHITE, COLOR_BLACK);
-    bkgd(COLOR_PAIR(2));
+    use_default_colors();
     noecho(); // 入力見えないように
     cbreak();
     keypad(stdscr, TRUE);
