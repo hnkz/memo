@@ -10,25 +10,47 @@
 #define clr_right       printf("\033[0K") //カーソル位置からその行の右端までをクリア
 #define clr_left        printf("\033[1K") //カーソル位置からその行の左端までをクリア
 #define clr_line        printf("\033[2K") //カーソル位置の行をクリア
-#define location(x,y)   printf("\033[%d;%dH" ,x,y) //カーソル位置を移動
+#define location(x, y)   printf("\033[%d;%dH" ,y,x) //カーソル位置を移動
 #define right(x)        printf("\033[%dC" ,x) //カーソルを指定数だけ右に移動
 #define left(x)         printf("\033[%dD" ,x) //カーソルを指定数だけ左に移動
 #define down(x)         printf("\033[%dB" ,x) //カーソルを指定数だけ下に移動
 #define up(x)           printf("\033[%dA" ,x) //カーソルを指定数だけ上に移動
 
 int get_window_width() {
-    
+    struct winsize ws;
+
+    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) != -1) {
+        return ws.ws_col;
+    }
+
+    return -1;
+}
+
+int get_window_height() {
+    struct winsize ws;
+
+    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) != -1) {
+        return ws.ws_row;
+    }
+
+    return -1;
+}
+
+void print_start_window() {
+    int win_row;
+    win_row = get_window_height();
+
+    clr
+    location(0, win_row);
+    printf("メモを追加 メモを削除 メモを編集\n");
 }
 
 int main(){
     // 基本はrootでメモを管理
     Memos root;
 
-
-
-    clr;
-    location(0, 0);
-    printf("This is memo app!\n");
+    // 画面の初期化
+    print_start_window();
 
     return 0;
 }
