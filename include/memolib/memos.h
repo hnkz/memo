@@ -1,12 +1,12 @@
 #include <memolib/memo.h>
 
-#define MAX_SHOW_MEMOS 4
+#define MAX_SHOW_MEMOS 3
 #define MAX_MEMO_STACK 1024
 
 typedef struct __Memos {
     Memo  memo;
     struct __Memos* next;
-    struct __Memos* before;
+    struct __Memos* prev;
 } Memos;
 
 typedef struct {
@@ -48,5 +48,7 @@ void  show_memos(Memos memos);
 // 選択状態でメモを表示
 void  show_memos_with_select(Memos memos, int num);
 
+// ソートのためのメモ表示
+void show_memos_with_select_for_sort(Memos memos, int will_select, int selected);
 // メモリ領域を解放
 void  free_memos(Memos* memos);

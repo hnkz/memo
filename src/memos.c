@@ -6,7 +6,7 @@ Memos new_memos() {
 
     memos.memo      = new_memo();
     memos.next      = NULL;
-    memos.before    = NULL;
+    memos.prev    = NULL;
 
     return memos;
 }
@@ -32,23 +32,22 @@ Memo pop_memo(MemoStack* stack) {
 int add_memo(Memos* memos, Memo memo) {
     Memos* tmp;
 
-    // メモがまだ一つもなかったら
+    // 初メモだったら
     if(memos->memo.title.value == NULL) {
         memos->memo = memo;
         return 0;
     }
 
     tmp         = malloc(sizeof(Memos));
-    *tmp        = new_memos();
     tmp->memo   = memo;
 
     if(memos->next == NULL) {
         memos->next = tmp;
-        tmp->before = memos;
+        tmp->prev = memos;
     } else {
-        tmp->before         = memos;
+        tmp->prev         = memos;
         tmp->next           = memos->next;
-        memos->next->before = tmp;
+        memos->next->prev = tmp;
         memos->next         = tmp;
     }
 
@@ -56,11 +55,19 @@ int add_memo(Memos* memos, Memo memo) {
 }
 
 int remove_memo(Memos* memos) {
-    if(memos->before != NULL)
-        memos->before->next = memos->next;
-    if(memos->next != NULL)
-        memos->next->before = memos->before;
-    free_memos(memos);
+    if(memos->prev != NULL) {
+        if(memos->next != NULL) {
+            memos->prev->next = memos->next;
+            memos->next->prev = memos->prev;
+        } else {
+            memos->prev->next = NULL;
+        }
+    } else {
+        if(memos->next != NULL) {
+            memos->next->prev = NULL;
+            memos = memos->next;
+        }
+    }
     return 0;
 }
 
@@ -78,46 +85,47 @@ int sort_memo_by_title(Memos* memo) {
 
 void show_memos(Memos memos) {
     int i;
-    for(i = 0; i < 3 && memos.next != NULL; i++) {
+    for(i = 0; i < MAX_SHOW_MEMOS && memos.next != NULL; i++) {
         show_memo(memos.memo);
         memos = *memos.next;
     }
     show_memo(memos.memo);
 }
 
-void show_memos_with_select(Memos memos, int num) {
-    int i;
-    Memos*      next_memos;
-    Memos*      before_memos;
-    MemoStack   stack;
-
-    next_memos      = memos.next;
-    before_memos    = memos.before;
-    stack           = new_memo_stack();
-
-    if(before_memos != NULL) {
-        for(i = 0; i < num - 1 && before_memos->before != NULL; i++) {
-            push_memo(&stack, before_memos->memo);
-            before_memos = before_memos->before;
-        }
-        push_memo(&stack, before_memos->memo);
-
-        for(i = stack.num; i > 0; i--) {
-            show_memo(pop_memo(&stack));
+void show_memos_with_select(Memos memos, int selected) {
+    if(memos.memo.title.value != NULL){
+        if(selected == 0) {
+            attrset(COLOR_PAIR(1));
+            show_memo(memos.memo);
+            attrset(COLOR_PAIR(2));
+            if(memos.next != NULL){
+                show_memo(memos.next->memo);
+                if(memos.next->next != NULL)
+                    show_memo(memos.next->next->memo);
+            }
+        } else if(selected == 1) {
+            if(memos.prev != NULL)
+                show_memo(memos.prev->memo);
+            attrset(COLOR_PAIR(1));
+            show_memo(memos.memo);
+            attrset(COLOR_PAIR(2));
+            if(memos.next != NULL)
+                show_memo(memos.next->memo);
+        } else if(selected == 2) {
+            if(memos.prev != NULL){
+                if(memos.prev->prev != NULL)
+                    show_memo(memos.prev->prev->memo);
+                show_memo(memos.prev->memo);
+            }
+            attrset(COLOR_PAIR(1));
+            show_memo(memos.memo);
+            attrset(COLOR_PAIR(2));
         }
     }
-    if(memos.memo.title.value != NULL) {
-        attrset(COLOR_PAIR(1));
-        show_memo(memos.memo);
-        attrset(COLOR_PAIR(2));
-    }
-    if(next_memos != NULL) {
-        for(i = 0; i < MAX_SHOW_MEMOS - num - 1 && next_memos->next != NULL; i++) {
-            show_memo(next_memos->memo);
-            next_memos = next_memos->next;
-        }
-        show_memo(next_memos->memo);
-    }
+}
+
+void show_memos_with_select_for_sort(Memos memos, int will_select, int selected) {
+
 }
 
 void free_memos(Memos* memos) {
