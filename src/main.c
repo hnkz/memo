@@ -10,24 +10,69 @@
 #define BUFSIZE         64
 #define FILE_LINE_CHARS 4096
 
+// ファイル名
+const char* filename    = "memo.sav";
+
+// ファイル読み込みの際に用いるセパレータ指定子
+const char* separator   = ",";
+
+// ヘルプ文字列
+const char* help        = "操作方法 j: 下, k: 上, h: 左, l: 右, Enter: 決定, x: 表示切り替え, q: 終了";
+
+// メニュー一覧
+const char* menus[]     = {
+    "メモを追加",
+    "メモを削除",
+    "メモを編集",
+    "メモを入れ替え",
+    "メモを検索",
+};
+
+// メニューの数
+const int menu_size     = sizeof(menus)/sizeof(char *);
+
+// 初期化処理
+void    init();
+
 // スタート画面のメニューを表示
-void    show_start_menu();
+void    print_menu();
 
 // スタート画面を表示
 void    print_start_window();
 
+// メモ追加画面を表示
+void    print_add_memo_window();
+
+// メモ編集画面を表示
+void    print_edit_memo_window();
+
+// メモ削除画面を表示
+void    print_remove_memo_window();
+
+// メモ並び替え画面を表示
+void    print_swap_memo_window();
+
+// メモ検索画面を表示
+void    print_search_memo_window();
+
 // 選択している操作を実行
 void    execute_menu();
-
-// メモをファイルにセーブ
-void    save_memo();
 
 // ファイルから読み込んだメモを追加
 void    add_memo_for_main(Memo memo);
 
+// ファイルの読み込みとメモの追加
+void    read_file_and_add_memo();
+
+// メモをファイルに書き込み
+void    save_memo();
+
+
+// リストのトップを保持
 Memos*  list_top;
+
+// 現在のmemosを保持
 Memos*  selected_memos;
-FILE*   fp;
 
 int     x, y, w, h;
 int     menu_status;
@@ -36,21 +81,8 @@ int     show_mode;
 int     key;
 int     memo_num;
 
-char* filename  = "memo.sav";
-char* separator = ",";
-char* help      = "操作方法 j: 下, k: 上, h: 左, l: 右, Enter: 決定, x: 表示切り替え, q: 終了";
-char* menus[]   = {
-    "メモを追加",
-    "メモを削除",
-    "メモを編集",
-    "メモを入れ替え",
-    "メモを検索",
-};
-
-int menu_size = sizeof(menus)/sizeof(char *);
-
 // ??
-void show_menu() {
+void print_menu() {
     int i;
 
     clear();
@@ -83,15 +115,15 @@ void show_menu() {
     refresh();
 }
 
-
 // ??
 void print_start_window() {
     while (1) {
         // メニューを表示
-        show_menu();
+        print_menu();
 
         key = getch();
         if (key == 'q') {
+            endwin();
             break;
         }
         switch(key) {
@@ -142,7 +174,6 @@ void print_start_window() {
     }
 }
 
-
 // Maybe ok
 void print_add_memo_window() {
     String title;
@@ -167,9 +198,6 @@ void print_add_memo_window() {
 
     // メモの追加
     add_memo_for_main(memo);
-
-    // メモの保存
-    save_memo();
 
     free(tmp);
 
@@ -196,8 +224,6 @@ void print_remove_memo_window() {
             memo_status = 0;
             memo_num    -= 1;
 
-            // メモの保存
-            save_memo();
             break;
         } else if(key == 'n'){
             break;
@@ -274,19 +300,19 @@ void print_edit_memo_window() {
     }
 }
 
-void print_sort_memo_window() {
-    Memos*  sort_selected_memo;
-    int     sort_memo_status;
+void print_swap_memo_window() {
+    Memos*  swap_selected_memo;
+    int     swap_memo_status;
 
     if(selected_memos->next != NULL)
-        sort_selected_memo = selected_memos->next;
+        swap_selected_memo = selected_memos->next;
     else if(selected_memos->prev != NULL)
-        sort_selected_memo = selected_memos->prev;
-    sort_memo_status = memo_status;
+        swap_selected_memo = selected_memos->prev;
+    swap_memo_status = memo_status;
     while (1) {
         // メニューを表示
         clear();
-        show_memos_with_select_for_sort(*sort_selected_memo, *selected_memos);
+        show_memos_with_select_for_sort(*swap_selected_memo, *selected_memos);
         y = h-1;
         x = 0;
         move(y, x);
@@ -295,8 +321,7 @@ void print_sort_memo_window() {
 
         key = getch();
         if (key == '\n') {
-            swap_memo(selected_memos, sort_selected_memo);
-            save_memo();
+            swap_memo(selected_memos, swap_selected_memo);
             break;
         } else if (key == 'q') {
             break;
@@ -304,38 +329,38 @@ void print_sort_memo_window() {
         switch(key) {
             case KEY_UP:
             case 'k':
-                if(sort_selected_memo->prev != NULL) {
-                    sort_selected_memo = sort_selected_memo->prev;
-                    if( cmp_memo_by_date(sort_selected_memo->memo, selected_memos->memo) != 0) {
-                        if(sort_memo_status > 0)
-                            sort_memo_status -= 1;
+                if(swap_selected_memo->prev != NULL) {
+                    swap_selected_memo = swap_selected_memo->prev;
+                    if( cmp_memo_by_date(swap_selected_memo->memo, selected_memos->memo) != 0) {
+                        if(swap_memo_status > 0)
+                            swap_memo_status -= 1;
                     } else {
-                        if(sort_selected_memo->prev != NULL) {
-                            sort_selected_memo = sort_selected_memo->prev;
-                            if(sort_memo_status > 0)
-                                sort_memo_status -= 2;
+                        if(swap_selected_memo->prev != NULL) {
+                            swap_selected_memo = swap_selected_memo->prev;
+                            if(swap_memo_status > 0)
+                                swap_memo_status -= 2;
                         } else {
-                            if(sort_selected_memo->next != NULL)
-                                sort_selected_memo = sort_selected_memo->next;
+                            if(swap_selected_memo->next != NULL)
+                                swap_selected_memo = swap_selected_memo->next;
                         }
                     }
                 }
                 break;
             case KEY_DOWN:
             case 'j':
-                if(sort_selected_memo->next != NULL) {
-                    sort_selected_memo = sort_selected_memo->next;
-                    if( cmp_memo_by_date(sort_selected_memo->memo, selected_memos->memo) != 0) {
-                        if(sort_memo_status < MAX_SHOW_MEMOS - 1)
-                            sort_memo_status += 1;
+                if(swap_selected_memo->next != NULL) {
+                    swap_selected_memo = swap_selected_memo->next;
+                    if( cmp_memo_by_date(swap_selected_memo->memo, selected_memos->memo) != 0) {
+                        if(swap_memo_status < MAX_SHOW_MEMOS - 1)
+                            swap_memo_status += 1;
                     } else {
-                        if(sort_selected_memo->next != NULL) {
-                            sort_selected_memo = sort_selected_memo->next;
-                            if(sort_memo_status < MAX_SHOW_MEMOS - 1)
-                                sort_memo_status += 2;
+                        if(swap_selected_memo->next != NULL) {
+                            swap_selected_memo = swap_selected_memo->next;
+                            if(swap_memo_status < MAX_SHOW_MEMOS - 1)
+                                swap_memo_status += 2;
                         } else {
-                            if(sort_selected_memo->prev != NULL)
-                                sort_selected_memo = sort_selected_memo->prev;
+                            if(swap_selected_memo->prev != NULL)
+                                swap_selected_memo = swap_selected_memo->prev;
                         }
                     }
                 }
@@ -364,37 +389,14 @@ void execute_menu() {
             break;
         case 3:
             if(memo_num > 1)
-                print_sort_memo_window();
+                print_swap_memo_window();
             break;
         case 4:
             if(memo_num > 0)
                 print_search_memo_window();
             break;
     }
-}
-
-void save_memo() {
-    Memos tmp;
-    String s;
-
-    fp = fopen(filename, "w");
-    if(fp == NULL) {
-        return;
-    }
-
-    tmp = *list_top;
-    while(tmp.next != NULL) {
-        s = ret_memo_for_save(tmp.memo);
-        fprintf(fp, "%s", s.value);
-        tmp = *(tmp.next);
-    } 
-    if(tmp.memo.title.value != NULL) {
-        s = ret_memo_for_save(tmp.memo);
-        fprintf(fp, "%s", s.value);
-    }
-
-    fclose(fp);
-    free_str(s);
+    save_memo();
 }
 
 void add_memo_for_main(Memo memo) {
@@ -409,12 +411,22 @@ void add_memo_for_main(Memo memo) {
 }
 
 int main(){
-    // 基本はlist_topでメモを管理
-    // 初期化処理
+
+    // 初期化処理(変数初期化、curses、ファイル読み込み)
+    init();
+
+    // 画面の初期化
+    print_start_window();
+
+    return 0;
+}
+
+void init() {
     menu_status = 0;
     memo_status = 0;
     memo_num    = 0;
     show_mode   = 0;
+
     setlocale(LC_ALL, "");// 日本語
     initscr();
     start_color();
@@ -432,7 +444,12 @@ int main(){
     *list_top        = new_memos();
     selected_memos   = list_top;
 
-    // ファイル読み込み処理
+    read_file_and_add_memo();
+}
+
+void read_file_and_add_memo() {
+    FILE* fp;
+
     fp = fopen(filename, "r");
     if(fp != NULL) {
         char    line[FILE_LINE_CHARS];
@@ -460,16 +477,37 @@ int main(){
             tok     = strtok(NULL, separator);
             memo.make_time_num = (time_t)atoi(tok);
             add_memo_for_main(memo);
+
+            // add_memo_for_mainはnextにメモを追加するため
             if(selected_memos->next != NULL)
                 selected_memos = selected_memos->next;
         }
         fclose(fp);
         selected_memos = list_top;
     }
+}
 
-    // 画面の初期化
-    print_start_window();
+void save_memo() {
+    FILE*   fp;
+    Memos   tmp;
+    String  s;
 
-    endwin();
-    return 0;
+    fp = fopen(filename, "w");
+    if(fp == NULL) {
+        return;
+    }
+
+    tmp = *list_top;
+    while(tmp.next != NULL) {
+        s = ret_memo_for_save(tmp.memo);
+        fprintf(fp, "%s", s.value);
+        tmp = *(tmp.next);
+    } 
+    if(tmp.memo.title.value != NULL) {
+        s = ret_memo_for_save(tmp.memo);
+        fprintf(fp, "%s", s.value);
+    }
+
+    fclose(fp);
+    free_str(s);
 }
