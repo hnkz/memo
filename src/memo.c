@@ -1,6 +1,8 @@
 #include <memolib/memo.h>
 #include <curses.h>
 
+#define BUFSIZE 64
+
 
 Memo new_memo() {
     Memo    memo;
@@ -126,4 +128,22 @@ void show_memo(Memo memo) {
     for(i = 0; i < CHARS_PER_LINE; i++)
         printw("––");
     printw("|\n\n");
+}
+
+String ret_memo_for_save(Memo memo) {
+    String ret;
+    char* tmp;
+
+    tmp = malloc(sizeof(char *) * BUFSIZE);
+    sprintf(tmp, "%s,%s,%s,%s,%lu\n", 
+        memo.title.value,
+        memo.text.value,
+        memo.make_time.value,
+        memo.update_time.value,
+        memo.make_time_num);
+
+    ret = make_str(tmp);
+    free(tmp);
+
+    return ret;
 }

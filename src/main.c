@@ -1,28 +1,44 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <curses.h>
 #include <locale.h>
 
 #include <memolib/memos.h>
 
-#define BUFSIZE 64
+#define BUFSIZE         64
+#define FILE_LINE_CHARS 4096
 
-void    show_menu();
+// スタート画面のメニューを表示
+void    show_start_menu();
+
+// スタート画面を表示
 void    print_start_window();
+
+// 選択している操作を実行
 void    execute_menu();
+
+// メモをファイルにセーブ
+void    save_memo();
+
+// ファイルから読み込んだメモを追加
+void    add_memo_for_main(Memo memo);
 
 Memos*  list_top;
 Memos*  selected_memos;
+FILE*   fp;
+
 int     x, y, w, h;
 int     menu_status;
 int     memo_status;
 int     key;
 int     memo_num;
 
-char* help = "操作方法 j: 下, k: 上, h: 左, l: 右, Enter: 決定, x: ヘルプ, q: 終了";
-
-char*  menus[] = {
+char* filename  = "sav.memo";
+char* separator = ",";
+char* help      = "操作方法 j: 下, k: 上, h: 左, l: 右, Enter: 決定, x: ヘルプ, q: 終了";
+char* menus[]   = {
     "メモを追加",
     "メモを削除",
     "メモを編集",
@@ -69,21 +85,6 @@ void print_start_window() {
     while (1) {
         // メニューを表示
         show_menu();
-        //if(selected_memos->next != NULL)
-        
-        // Memos* tmp;
-        // tmp = &list_top;
-        // while(tmp->next != NULL && tmp->memo.title.value != NULL) {
-        //     printw("%s->", tmp->memo.title.value);
-        //     tmp = tmp->next;
-        // }
-        // if(tmp->memo.title.value != NULL)
-        //     printw("%s->", tmp->memo.title.value);
-        // if(selected_memos->prev != NULL)
-        //     printw("%s->", selected_memos->prev->memo.title.value);
-        // printw("[%s]", selected_memos->memo.title.value);
-        // if(selected_memos->next != NULL)
-        //     printw("->%s", selected_memos->next->memo.title.value);
 
         key = getch();
         if (key == 'q') break;
@@ -153,13 +154,11 @@ void print_add_memo_window() {
 
     memo = make_memo(title, text);
 
-    if(list_top->memo.title.value == NULL) {
-        add_memo(list_top, memo);
-    } else {
-        add_memo(selected_memos, memo);
-    }
+    // メモの追加
+    add_memo_for_main(memo);
 
-    memo_num += 1;
+    // メモの保存
+    save_memo();
 
     free(tmp);
 
@@ -184,8 +183,12 @@ void print_remove_memo_window() {
                 }
             }
             remove_memo(selected_memos);
+
             memo_status = 0;
             memo_num    -= 1;
+
+            // メモの保存
+            save_memo();
             break;
         } else if(key == 'n'){
             break;
@@ -333,6 +336,41 @@ void execute_menu() {
     }
 }
 
+void save_memo() {
+    Memos tmp;
+    String s;
+
+    fp = fopen(filename, "w");
+    if(fp == NULL) {
+        return;
+    }
+
+    tmp = *list_top;
+    while(tmp.next != NULL) {
+        s = ret_memo_for_save(tmp.memo);
+        fprintf(fp, "%s", s.value);
+        tmp = *(tmp.next);
+    } 
+    if(tmp.memo.title.value != NULL) {
+        s = ret_memo_for_save(tmp.memo);
+        fprintf(fp, "%s", s.value);
+    }
+
+    fclose(fp);
+    free_str(s);
+}
+
+void add_memo_for_main(Memo memo) {
+     if(list_top->memo.title.value == NULL) {
+         add_memo(list_top, memo);
+     } else {
+         add_memo(selected_memos, memo);
+     }
+
+     // メモのカウント
+     memo_num += 1;
+}
+
 int main(){
     // 基本はlist_topでメモを管理
     // 初期化処理
@@ -355,6 +393,38 @@ int main(){
     list_top         = malloc(sizeof(Memos));
     *list_top        = new_memos();
     selected_memos   = list_top;
+
+    // ファイル読み込み処理
+    fp = fopen(filename, "r");
+    if(fp != NULL) {
+        char    line[FILE_LINE_CHARS];
+        char*   tok;
+        Memo    memo;
+
+        while(fgets(line, FILE_LINE_CHARS, fp) != NULL) {
+            // タイトル
+            tok     = strtok(line, separator);
+            memo.title   = make_str(tok);
+
+            // テキスト
+            tok     = strtok(NULL, separator);
+            memo.text    = make_str(tok);
+            
+            // 作成日時
+            tok         = strtok(NULL, separator);
+            memo.make_time   = make_str(tok);
+
+            // 更新日時
+            tok         = strtok(NULL, separator);
+            memo.update_time = make_str(tok);
+
+            // 作成日時num
+            tok     = strtok(NULL, separator);
+            memo.make_time_num = (time_t)atoi(tok);
+            add_memo_for_main(memo);
+        }
+        fclose(fp);
+    }
 
     // 画面の初期化
     print_start_window();

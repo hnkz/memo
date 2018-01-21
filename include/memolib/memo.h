@@ -37,3 +37,6 @@ int     cmp_memo_by_date(Memo memo1, Memo memo2);
 
 // メモを表示　色々と改良が必要
 void    show_memo(Memo memo);
+
+// 保存用のメモを返す
+String  ret_memo_for_save(Memo memo);
