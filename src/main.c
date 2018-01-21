@@ -6,6 +6,8 @@
 
 #include <memolib/memos.h>
 
+#define BUFSIZE 64
+
 void    show_menu();
 void    print_start_window();
 void    execute_menu();
@@ -136,7 +138,7 @@ void print_add_memo_window() {
     Memo   memo;
     char* tmp;
 
-    tmp = malloc(sizeof(char *));
+    tmp = malloc(sizeof(char *) * BUFSIZE);
 
     clear();
     echo();
@@ -165,7 +167,6 @@ void print_add_memo_window() {
 }
 
 void print_remove_memo_window() {
-    
     clear();
     show_memo(selected_memos->memo);
     printw("\nこのメモを削除しますか？(y/n)");
@@ -194,7 +195,71 @@ void print_remove_memo_window() {
 }
 
 void print_edit_memo_window() {
+    int   edit_menu_status;
+    edit_menu_status = 0;
 
+    while(1) {
+        clear();
+        show_memo(selected_memos->memo);
+        printw("このメモを編集します\n");
+        printw("タイトル、テキストのどちらを編集しますか？");
+
+        y = h-1;
+        x = 0;
+        move(y, x);
+
+        if(edit_menu_status == 0) {
+            attrset(COLOR_PAIR(0) | A_REVERSE);
+            printw("タイトル");
+            attrset(COLOR_PAIR(0));
+            printw(" テキスト");
+        } else if(edit_menu_status == 1) {
+            printw("タイトル ");
+            attrset(COLOR_PAIR(0) | A_REVERSE);
+            printw("テキスト");
+            attrset(COLOR_PAIR(0));
+        }
+
+        key = getch();
+        if(key == 'q') {
+            break;
+        } else if(key == '\n') {
+            char* tmp;
+            tmp = malloc(sizeof(char *) * BUFSIZE);
+
+            clear();
+            echo();
+            show_memo(selected_memos->memo);
+
+            if(edit_menu_status == 0) {
+                printw("タイトルを入力してください: ");
+                scanw("%s", tmp);
+                set_title(&selected_memos->memo, tmp);
+            } else if(edit_menu_status == 1) {
+                printw("テキストを入力してください: ");
+                scanw("%s", tmp);
+                set_text(&selected_memos->memo, tmp);
+            }
+
+            noecho();
+            break;
+        }
+
+        switch(key) {
+            case KEY_LEFT:
+            case 'h':
+                if(edit_menu_status == 1)
+                    edit_menu_status = 0;
+                break;
+            case KEY_RIGHT:
+            case 'l':
+                if(edit_menu_status == 0)
+                    edit_menu_status = 1;
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void print_sort_memo_window() {
@@ -211,6 +276,7 @@ void print_sort_memo_window() {
         x = 0;
         move(y, x);
         printw("選択したメモの前に、先ほど選択したメモを移動させます。");
+        refresh();
 
         key = getch();
         if (key == '\n') {
