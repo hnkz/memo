@@ -32,17 +32,18 @@ FILE*   fp;
 int     x, y, w, h;
 int     menu_status;
 int     memo_status;
+int     show_mode;
 int     key;
 int     memo_num;
 
 char* filename  = "sav.memo";
 char* separator = ",";
-char* help      = "操作方法 j: 下, k: 上, h: 左, l: 右, Enter: 決定, x: ヘルプ, q: 終了";
+char* help      = "操作方法 j: 下, k: 上, h: 左, l: 右, Enter: 決定, x: 表示切り替え, q: 終了";
 char* menus[]   = {
     "メモを追加",
     "メモを削除",
     "メモを編集",
-    "メモを並び替え",
+    "メモを入れ替え",
     "メモを検索",
 };
 
@@ -54,8 +55,11 @@ void show_menu() {
 
     clear();
 
-    // メモを表示
-    show_memos_with_select(*selected_memos, memo_status);
+    // メモを表示(未実装)
+    if(show_mode == 0)
+        show_memos_with_select(*selected_memos, memo_status);
+    if(show_mode == 1)
+        show_memos_with_select(*selected_memos, memo_status);
 
     // メニューを表示
     // 一番下にカーソルを合わせる
@@ -87,7 +91,10 @@ void print_start_window() {
         show_menu();
 
         key = getch();
-        if (key == 'q') break;
+        if (key == 'q') {
+            save_memo();
+            break;
+        }
         switch(key) {
             case KEY_UP:
             case 'k':
@@ -119,8 +126,13 @@ void print_start_window() {
                 else
                     menu_status += 1;
                 break;
-
             case 'x':
+                if(show_mode == 0) {
+                    show_mode = 1;
+                } else if(show_mode == 1) {
+                    show_mode = 0;
+                }
+                break;
             case '\n':
                 execute_menu();
                 break;
@@ -178,8 +190,6 @@ void print_remove_memo_window() {
                 if(selected_memos->next != NULL) {
                     list_top = list_top->next;
                     list_top->prev = NULL;
-                } else {
-
                 }
             }
             remove_memo(selected_memos);
@@ -269,12 +279,15 @@ void print_sort_memo_window() {
     Memos*  sort_selected_memo;
     int     sort_memo_status;
 
-    sort_selected_memo = selected_memos;
+    if(selected_memos->next != NULL)
+        sort_selected_memo = selected_memos->next;
+    else if(selected_memos->prev != NULL)
+        sort_selected_memo = selected_memos->prev;
     sort_memo_status = memo_status;
     while (1) {
         // メニューを表示
         clear();
-        show_memos_with_select_for_sort(*sort_selected_memo, sort_memo_status, memo_status);
+        show_memos_with_select_for_sort(*sort_selected_memo, *selected_memos);
         y = h-1;
         x = 0;
         move(y, x);
@@ -283,25 +296,50 @@ void print_sort_memo_window() {
 
         key = getch();
         if (key == '\n') {
-
+            swap_memo(selected_memos, sort_selected_memo);
+            save_memo();
+            break;
+        } else if (key == 'q') {
             break;
         }
         switch(key) {
             case KEY_UP:
             case 'k':
-                if(sort_selected_memo->prev != NULL)
+                if(sort_selected_memo->prev != NULL) {
                     sort_selected_memo = sort_selected_memo->prev;
-                if(sort_memo_status > 0)
-                    sort_memo_status -= 1;
+                    if( cmp_memo_by_date(sort_selected_memo->memo, selected_memos->memo) != 0) {
+                        if(sort_memo_status > 0)
+                            sort_memo_status -= 1;
+                    } else {
+                        if(sort_selected_memo->prev != NULL) {
+                            sort_selected_memo = sort_selected_memo->prev;
+                            if(sort_memo_status > 0)
+                                sort_memo_status -= 2;
+                        } else {
+                            if(sort_selected_memo->next != NULL)
+                                sort_selected_memo = sort_selected_memo->next;
+                        }
+                    }
+                }
                 break;
             case KEY_DOWN:
             case 'j':
-                if(sort_selected_memo->next == selected_memos)
-                    sort_selected_memo = selected_memos->next;
-                else if(sort_selected_memo->next != NULL)
+                if(sort_selected_memo->next != NULL) {
                     sort_selected_memo = sort_selected_memo->next;
-                if(sort_memo_status < 3)
-                    sort_memo_status += 1;
+                    if( cmp_memo_by_date(sort_selected_memo->memo, selected_memos->memo) != 0) {
+                        if(sort_memo_status < MAX_SHOW_MEMOS - 1)
+                            sort_memo_status += 1;
+                    } else {
+                        if(sort_selected_memo->next != NULL) {
+                            sort_selected_memo = sort_selected_memo->next;
+                            if(sort_memo_status < MAX_SHOW_MEMOS - 1)
+                                sort_memo_status += 2;
+                        } else {
+                            if(sort_selected_memo->prev != NULL)
+                                sort_selected_memo = sort_selected_memo->prev;
+                        }
+                    }
+                }
                 break;
         }
     }
@@ -377,6 +415,7 @@ int main(){
     menu_status = 0;
     memo_status = 0;
     memo_num    = 0;
+    show_mode   = 0;
     setlocale(LC_ALL, "");// 日本語
     initscr();
     start_color();

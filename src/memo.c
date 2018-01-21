@@ -90,6 +90,10 @@ void show_memo(Memo memo) {
     int center;
     int count;
 
+    // ヌルの場合
+    if(memo.title.value == NULL)
+        return;
+
     // 1ライン　60文字
     // タイトル
     center = CHARS_PER_LINE - (count_str(memo.title) / 2);

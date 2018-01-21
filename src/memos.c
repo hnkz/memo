@@ -86,7 +86,27 @@ int remove_memo(Memos* memos) {
     return 0;
 }
 
-int edit_memo(Memos* memos, Memo meom) {
+int edit_memos(Memos* memos, Memo meom) {
+    return 0;
+}
+
+int swap_memo(Memos* memos1, Memos* memos2) {
+    Memos tmp;
+
+    tmp = *memos1;
+
+    memos1->memo.title          = memos2->memo.title;
+    memos1->memo.text           = memos2->memo.text;
+    memos1->memo.make_time      = memos2->memo.make_time;
+    memos1->memo.update_time    = memos2->memo.update_time;
+    memos1->memo.make_time_num  = memos2->memo.make_time_num;
+
+    memos2->memo.title          = tmp.memo.title;
+    memos2->memo.text           = tmp.memo.text;
+    memos2->memo.make_time      = tmp.memo.make_time;
+    memos2->memo.update_time    = tmp.memo.update_time;
+    memos2->memo.make_time_num  = tmp.memo.make_time_num;
+
     return 0;
 }
 
@@ -139,8 +159,65 @@ void show_memos_with_select(Memos memos, int selected) {
     }
 }
 
-void show_memos_with_select_for_sort(Memos memos, int will_select, int selected) {
+void show_memos_title_with_select(Memos memos, int selected) {
+    
+}
 
+void show_memos_with_select_for_sort(Memos memos, Memos selected_memos) {
+    Memos*  next;
+    Memos*  prev;
+    Memos*  next_next;
+    Memos*  prev_prev;
+
+    next        = memos.next;
+    prev        = memos.prev;
+    prev_prev   = NULL;
+    next_next   = NULL;
+
+    if(prev != NULL) {
+        if(cmp_memo_by_date(prev->memo, selected_memos.memo) == 0) {
+            prev = prev->prev;
+        }
+        if(prev != NULL)
+            prev_prev = prev->prev;
+        if(prev_prev != NULL && cmp_memo_by_date(prev_prev->memo, selected_memos.memo) == 0)
+            prev_prev = prev_prev->prev;
+    }
+    if(next != NULL) {
+        if(cmp_memo_by_date(next->memo, selected_memos.memo) == 0) {
+            next = next->next;
+        }
+        if(next != NULL)
+            next_next = next->next;
+        if(next_next != NULL && cmp_memo_by_date(next_next->memo, selected_memos.memo) == 0)
+            next_next = next_next->next;
+    }
+
+    if (next != NULL && prev != NULL) {
+        show_memo(prev->memo);
+        attrset(COLOR_PAIR(0)| A_REVERSE);
+        show_memo(memos.memo);
+        attrset(COLOR_PAIR(0));
+        show_memo(next->memo);
+    } else if (next == NULL && prev != NULL) {
+        if(prev_prev != NULL)
+            show_memo(prev_prev->memo);
+        show_memo(prev->memo);
+        attrset(COLOR_PAIR(0)| A_REVERSE);
+        show_memo(memos.memo);
+        attrset(COLOR_PAIR(0));
+    } else if (prev == NULL && next != NULL) {
+        attrset(COLOR_PAIR(0)| A_REVERSE);
+        show_memo(memos.memo);
+        attrset(COLOR_PAIR(0));
+        show_memo(next->memo);
+        if(next_next != NULL)
+            show_memo(next_next->memo);
+    } else {
+        attrset(COLOR_PAIR(0)| A_REVERSE);
+        show_memo(memos.memo);
+        attrset(COLOR_PAIR(0));
+    }
 }
 
 void free_memos(Memos* memos) {
