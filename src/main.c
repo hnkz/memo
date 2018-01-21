@@ -36,7 +36,7 @@ int     show_mode;
 int     key;
 int     memo_num;
 
-char* filename  = "sav.memo";
+char* filename  = "memo.sav";
 char* separator = ",";
 char* help      = "操作方法 j: 下, k: 上, h: 左, l: 右, Enter: 決定, x: 表示切り替え, q: 終了";
 char* menus[]   = {
@@ -92,7 +92,6 @@ void print_start_window() {
 
         key = getch();
         if (key == 'q') {
-            save_memo();
             break;
         }
         switch(key) {
@@ -461,8 +460,11 @@ int main(){
             tok     = strtok(NULL, separator);
             memo.make_time_num = (time_t)atoi(tok);
             add_memo_for_main(memo);
+            if(selected_memos->next != NULL)
+                selected_memos = selected_memos->next;
         }
         fclose(fp);
+        selected_memos = list_top;
     }
 
     // 画面の初期化
