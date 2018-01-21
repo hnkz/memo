@@ -1,4 +1,5 @@
 #include <memolib/memo.h>
+#include <time.h>
 
 #define MAX_SHOW_MEMOS 3
 #define MAX_MEMO_STACK 1024
@@ -21,11 +22,10 @@ Memos new_memos();
 MemoStack new_memo_stack();
 
 // メモスタックにプッシュ
-int push_memo(MemoStack* stack, Memo memo);
-
+int   push_memo(MemoStack* stack, Memo memo);
 
 // メモスタックをポップ
-Memo pop_memo(MemoStack* stack);
+Memo  pop_memo(MemoStack* stack);
 
 // メモを追加
 int   add_memo(Memos* memos, Memo memo);
@@ -40,10 +40,13 @@ int   edit_memo(Memos* memos, Memo memo);
 int   swap_memo(Memos* memos1, Memos* memos2);
 
 // メモをタイトルで検索 複数場合は線形リストで
-Memos search_memo_by_title(Memos* memos);
+Memos* search_memo_by_title(Memos memos, char* title);
+
+// メモをテキストで検索
+Memos* search_memo_by_text(Memos memos, char* text);
 
 // メモを日付で検索
-Memos search_memo_by_date(Memos* memos);
+Memos* search_memo_by_date(Memos memos, time_t make_time_num);
 
 // メモを表示
 void  show_memos(Memos memos);
@@ -52,7 +55,7 @@ void  show_memos(Memos memos);
 void  show_memos_with_select(Memos memos);
 
 // タイトルだけメモ表示
-void  show_memos_title_with_select(Memos memos, int num);
+void  show_memos_title_with_select(Memos memos);
 
 // ソートのためのメモ表示
 void show_memos_with_select_for_sort(Memos memos, Memos selected_memos);

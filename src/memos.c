@@ -58,12 +58,6 @@ int add_memo(Memos* memos, Memo memo) {
 int remove_memo(Memos* memos) {
     Memos* tmp;
 
-    // if(memos->prev != NULL)
-    //     printw("%s->", memos->prev->memo.title.value);
-    // printw("[%s]", memos->memo.title.value);
-    // if(memos->next != NULL)
-    //     printw("->%s", memos->next->memo.title.value);
-
     tmp = memos;
     if(tmp->prev != NULL) {
         if(tmp->next != NULL) {
@@ -110,21 +104,52 @@ int swap_memo(Memos* memos1, Memos* memos2) {
     return 0;
 }
 
-int sort_memo_by_date(Memos* memos) {
-    return 0;
+Memos* search_memo_by_title(Memos memos, char* title) {
+    Memos* ret;
+    Memos* tmp;
+
+    ret = NULL;
+
+    while(memos.next != NULL) {
+        if(strcmp(memos.memo.title.value, title) == 0) {
+            if(ret == NULL){
+                tmp         = malloc(sizeof(Memos));
+                *tmp        = memos;
+                tmp->next   = NULL;
+                ret         = tmp;
+                ret->prev   = NULL;
+            } else {
+                tmp->next   = malloc(sizeof(Memos));
+                memos.prev  = tmp;
+                *tmp->next  = memos;
+                tmp         = tmp->next;
+                tmp->next   = NULL;
+            }
+        }
+
+        memos = *memos.next;
+    }
+
+    return ret;
 }
 
-int sort_memo_by_title(Memos* memo) {
-    return 0;
+Memos* search_memo_by_text(Memos memos, char* text) {
+    
+}
+
+Memos* search_memo_by_date(Memos memos, time_t make_time_num) {
+    
 }
 
 void show_memos(Memos memos) {
     int i;
-    for(i = 0; i < MAX_SHOW_MEMOS && memos.next != NULL; i++) {
-        show_memo(memos.memo);
+    for(i = 0; memos.next != NULL; i++) {
+        printw("%s->", memos.memo.title.value);
+        //show_memo(memos.memo);
         memos = *memos.next;
     }
-    show_memo(memos.memo);
+    printw("%s", memos.memo.title.value);
+    //show_memo(memos.memo);
 }
 
 void show_memos_with_select(Memos memos) {
@@ -172,7 +197,7 @@ void show_memos_with_select(Memos memos) {
     }
 }
 
-void show_memos_title_with_select(Memos memos, int selected) {
+void show_memos_title_with_select(Memos memos) {
     
 }
 

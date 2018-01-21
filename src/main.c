@@ -11,16 +11,16 @@
 #define FILE_LINE_CHARS 4096
 
 // ファイル名
-const char* filename    = "memo.sav";
+char* filename    = "memo.sav";
 
 // ファイル読み込みの際に用いるセパレータ指定子
-const char* separator   = ",";
+char* separator   = ",";
 
 // ヘルプ文字列
-const char* help        = "操作方法 j: 下, k: 上, h: 左, l: 右, Enter: 決定, x: 表示切り替え, q: 終了";
+char* help        = "操作方法 j: 下, k: 上, h: 左, l: 右, Enter: 決定, x: 表示切り替え, q: 終了";
 
-// メニュー一覧
-const char* menus[]     = {
+// メニュー 一覧
+char* start_menus[]     = {
     "メモを追加",
     "メモを削除",
     "メモを編集",
@@ -28,14 +28,36 @@ const char* menus[]     = {
     "メモを検索",
 };
 
-// メニューの数
-const int menu_size     = sizeof(menus)/sizeof(char *);
+// 検索できる項目
+char* search_menus[] = {
+    "タイトル",
+//    "テキスト",
+//    "作成日時",
+};
+
+// 検索語のメニュー
+char* searched_menus[] = {
+//    "メモを削除",
+//    "メモを編集",
+};
+
+// メニューのサイズ
+int start_menu_size      = sizeof(start_menus)/sizeof(char *);
+
+// 検索メニューのサイズ
+int search_menu_size     = sizeof(search_menus)/sizeof(char *);
+
+// 検索語メニューのサイズ
+int searched_menu_size   = sizeof(searched_menus)/sizeof(char *);
 
 // 初期化処理
 void    init();
 
 // スタート画面のメニューを表示
-void    print_menu();
+void print_menu(Memos now_memos, char* menus[], int menu_size, char* description, int menu_status);
+
+// 検索画面のメニューを表示
+void    print_search_menu(Memos list);
 
 // スタート画面を表示
 void    print_start_window();
@@ -75,22 +97,22 @@ Memos*  list_top;
 Memos*  selected_memos;
 
 int     x, y, w, h;
-int     menu_status;
+int     start_menu_status;
 int     show_mode;
 int     key;
 int     memo_num;
 
 // ??
-void print_menu() {
+void print_menu(Memos now_memos, char* menus[], int menu_size, char* description, int menu_status) {
     int i;
 
     clear();
 
     // メモを表示(未実装)
     if(show_mode == 0)
-        show_memos_with_select(*selected_memos);
+        show_memos_with_select(now_memos);
     if(show_mode == 1)
-        show_memos_with_select(*selected_memos);
+        show_memos_with_select(now_memos);
 
     // メニューを表示
     // 一番下にカーソルを合わせる
@@ -109,7 +131,7 @@ void print_menu() {
         printw(" ");
     }
 
-    printw("  %s", help);
+    printw("  %s", description);
 
     refresh();
 }
@@ -118,7 +140,7 @@ void print_menu() {
 void print_start_window() {
     while (1) {
         // メニューを表示
-        print_menu();
+        print_menu(*selected_memos, start_menus, start_menu_size, help, start_menu_status);
 
         key = getch();
         if (key == 'q') {
@@ -140,17 +162,17 @@ void print_start_window() {
                 break;
             case KEY_LEFT:
             case 'h':
-                if(menu_status == 0)
-                    menu_status = menu_size-1;
+                if(start_menu_status == 0)
+                    start_menu_status = start_menu_size-1;
                 else 
-                    menu_status -= 1;
+                    start_menu_status -= 1;
                 break;
             case KEY_RIGHT:
             case 'l':
-                if(menu_status == menu_size-1)
-                    menu_status = 0;
+                if(start_menu_status == start_menu_size-1)
+                    start_menu_status = 0;
                 else
-                    menu_status += 1;
+                    start_menu_status += 1;
                 break;
             case 'x':
                 if(show_mode == 0) {
@@ -352,11 +374,127 @@ void print_swap_memo_window() {
 }
 
 void print_search_memo_window() {
+    int search_menu_status;
+    int i;
 
+    search_menu_status = 0;
+
+    while(1) {
+        clear();
+        printw("どの項目から検索しますか？");
+        y = h-1;
+        x = 0;
+        move(y, x);
+
+        for(i = 0; i < search_menu_size; i++) {
+            if(i == search_menu_status){
+                printw(" ");
+                attrset(COLOR_PAIR(0) | A_REVERSE);
+                printw("%s", search_menus[i]);
+                attrset(COLOR_PAIR(0));
+            } else {
+                printw(" %s", search_menus[i]);
+            }
+        }
+
+        key = getch();
+        if(key == 'q') {
+            break;
+        } else if(key == '\n') {
+            Memos*  search_top;
+            char*   tmp_char;
+
+            tmp_char = malloc(sizeof(char *) * BUFSIZE);
+
+            clear();
+            echo();
+            printw("検索する[ %s ]を入力してください: ", search_menus[search_menu_status]);
+            scanw("%s", tmp_char);
+
+            search_top = NULL;
+            if(search_menu_status == 0) {
+                search_top = search_memo_by_title(*list_top, tmp_char);
+            } else if(search_menu_status == 1) {
+                search_top = search_memo_by_text(*list_top, tmp_char);
+            } else if(search_menu_status == 2) {
+                search_top = search_memo_by_date(*list_top, atoi(tmp_char));
+            }
+
+            if(search_top != NULL) {
+                Memos* searched_selected_memos;
+
+                searched_selected_memos = search_top;
+                search_menu_status = 0;
+                while (1) {
+                    // メニューを表示
+                    print_menu(*searched_selected_memos, searched_menus, searched_menu_size, help, search_menu_status);
+
+                    key = getch();
+                    if (key == 'q') {
+                        break;
+                    }
+                    switch(key) {
+                        case KEY_UP:
+                        case 'k':
+                            if(searched_selected_memos->prev != NULL) {
+                                searched_selected_memos = searched_selected_memos->prev;
+                            }
+                            break;
+                        case KEY_DOWN:
+                        case 'j':
+                            if(searched_selected_memos->next != NULL) {
+                                searched_selected_memos = searched_selected_memos->next;
+                            }
+                            break;
+                        case KEY_LEFT:
+                        case 'h':
+                            if(search_menu_status == 0)
+                                search_menu_status = searched_menu_size-1;
+                            else 
+                                search_menu_status -= 1;
+                            break;
+                        case KEY_RIGHT:
+                        case 'l':
+                            if(search_menu_status == searched_menu_size-1)
+                                search_menu_status = 0;
+                            else
+                                search_menu_status += 1;
+                            break;
+                        case '\n':
+                            execute_menu();
+                            break;
+                        default:
+
+                            break;
+                    }
+                }
+            }
+
+            free(tmp_char);
+            noecho();
+
+            break;
+        }
+
+        switch(key) {
+            case KEY_LEFT:
+            case 'h':
+                if(search_menu_status > 0)
+                    search_menu_status -= 1;
+                break;
+            case KEY_RIGHT:
+            case 'l':
+                if(search_menu_status < 2)
+                    search_menu_status += 1;
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void execute_menu() {
-    switch(menu_status) {
+    switch(start_menu_status) {
         case 0:
             print_add_memo_window();
             break;
@@ -403,9 +541,9 @@ int main(){
 }
 
 void init() {
-    menu_status = 0;
-    memo_num    = 0;
-    show_mode   = 0;
+    start_menu_status   = 0;
+    memo_num            = 0;
+    show_mode           = 0;
 
     setlocale(LC_ALL, "");// 日本語
     initscr();
