@@ -76,7 +76,6 @@ Memos*  selected_memos;
 
 int     x, y, w, h;
 int     menu_status;
-int     memo_status;
 int     show_mode;
 int     key;
 int     memo_num;
@@ -89,9 +88,9 @@ void print_menu() {
 
     // メモを表示(未実装)
     if(show_mode == 0)
-        show_memos_with_select(*selected_memos, memo_status);
+        show_memos_with_select(*selected_memos);
     if(show_mode == 1)
-        show_memos_with_select(*selected_memos, memo_status);
+        show_memos_with_select(*selected_memos);
 
     // メニューを表示
     // 一番下にカーソルを合わせる
@@ -131,16 +130,12 @@ void print_start_window() {
             case 'k':
                 if(selected_memos->prev != NULL) {
                     selected_memos = selected_memos->prev;
-                    if(memo_status > 0)
-                        memo_status -= 1;
                 }
                 break;
             case KEY_DOWN:
             case 'j':
                 if(selected_memos->next != NULL) {
                     selected_memos = selected_memos->next;
-                    if(memo_status < MAX_SHOW_MEMOS - 1)
-                        memo_status += 1;
                 }
                 break;
             case KEY_LEFT:
@@ -220,8 +215,6 @@ void print_remove_memo_window() {
                 }
             }
             remove_memo(selected_memos);
-
-            memo_status = 0;
             memo_num    -= 1;
 
             break;
@@ -302,13 +295,11 @@ void print_edit_memo_window() {
 
 void print_swap_memo_window() {
     Memos*  swap_selected_memo;
-    int     swap_memo_status;
 
     if(selected_memos->next != NULL)
         swap_selected_memo = selected_memos->next;
     else if(selected_memos->prev != NULL)
         swap_selected_memo = selected_memos->prev;
-    swap_memo_status = memo_status;
     while (1) {
         // メニューを表示
         clear();
@@ -331,14 +322,9 @@ void print_swap_memo_window() {
             case 'k':
                 if(swap_selected_memo->prev != NULL) {
                     swap_selected_memo = swap_selected_memo->prev;
-                    if( cmp_memo_by_date(swap_selected_memo->memo, selected_memos->memo) != 0) {
-                        if(swap_memo_status > 0)
-                            swap_memo_status -= 1;
-                    } else {
+                    if( cmp_memo_by_date(swap_selected_memo->memo, selected_memos->memo) == 0) {
                         if(swap_selected_memo->prev != NULL) {
                             swap_selected_memo = swap_selected_memo->prev;
-                            if(swap_memo_status > 0)
-                                swap_memo_status -= 2;
                         } else {
                             if(swap_selected_memo->next != NULL)
                                 swap_selected_memo = swap_selected_memo->next;
@@ -350,14 +336,9 @@ void print_swap_memo_window() {
             case 'j':
                 if(swap_selected_memo->next != NULL) {
                     swap_selected_memo = swap_selected_memo->next;
-                    if( cmp_memo_by_date(swap_selected_memo->memo, selected_memos->memo) != 0) {
-                        if(swap_memo_status < MAX_SHOW_MEMOS - 1)
-                            swap_memo_status += 1;
-                    } else {
+                    if( cmp_memo_by_date(swap_selected_memo->memo, selected_memos->memo) == 0) {
                         if(swap_selected_memo->next != NULL) {
                             swap_selected_memo = swap_selected_memo->next;
-                            if(swap_memo_status < MAX_SHOW_MEMOS - 1)
-                                swap_memo_status += 2;
                         } else {
                             if(swap_selected_memo->prev != NULL)
                                 swap_selected_memo = swap_selected_memo->prev;
@@ -423,7 +404,6 @@ int main(){
 
 void init() {
     menu_status = 0;
-    memo_status = 0;
     memo_num    = 0;
     show_mode   = 0;
 

@@ -127,35 +127,48 @@ void show_memos(Memos memos) {
     show_memo(memos.memo);
 }
 
-void show_memos_with_select(Memos memos, int selected) {
-    if(memos.memo.title.value != NULL){
-        if(selected == 0) {
-            attrset(COLOR_PAIR(0)| A_REVERSE);
-            show_memo(memos.memo);
-            attrset(COLOR_PAIR(0));
-            if(memos.next != NULL){
-                show_memo(memos.next->memo);
-                if(memos.next->next != NULL)
-                    show_memo(memos.next->next->memo);
-            }
-        } else if(selected == 1) {
-            if(memos.prev != NULL)
-                show_memo(memos.prev->memo);
-            attrset(COLOR_PAIR(0)| A_REVERSE);
-            show_memo(memos.memo);
-            attrset(COLOR_PAIR(0));
-            if(memos.next != NULL)
-                show_memo(memos.next->memo);
-        } else if(selected == 2) {
-            if(memos.prev != NULL){
-                if(memos.prev->prev != NULL)
-                    show_memo(memos.prev->prev->memo);
-                show_memo(memos.prev->memo);
-            }
-            attrset(COLOR_PAIR(0)| A_REVERSE);
-            show_memo(memos.memo);
-            attrset(COLOR_PAIR(0));
-        }
+void show_memos_with_select(Memos memos) {
+    Memos*  next;
+    Memos*  prev;
+    Memos*  next_next;
+    Memos*  prev_prev;
+
+    next        = memos.next;
+    prev        = memos.prev;
+    prev_prev   = NULL;
+    next_next   = NULL;
+
+    if(prev != NULL) {
+        prev_prev = prev->prev;
+    }
+    if(next != NULL) {
+        next_next = next->next;
+    }
+
+    if (next != NULL && prev != NULL) {
+        show_memo(prev->memo);
+        attrset(COLOR_PAIR(0)| A_REVERSE);
+        show_memo(memos.memo);
+        attrset(COLOR_PAIR(0));
+        show_memo(next->memo);
+    } else if (next == NULL && prev != NULL) {
+        if(prev_prev != NULL)
+            show_memo(prev_prev->memo);
+        show_memo(prev->memo);
+        attrset(COLOR_PAIR(0)| A_REVERSE);
+        show_memo(memos.memo);
+        attrset(COLOR_PAIR(0));
+    } else if (prev == NULL && next != NULL) {
+        attrset(COLOR_PAIR(0)| A_REVERSE);
+        show_memo(memos.memo);
+        attrset(COLOR_PAIR(0));
+        show_memo(next->memo);
+        if(next_next != NULL)
+            show_memo(next_next->memo);
+    } else {
+        attrset(COLOR_PAIR(0)| A_REVERSE);
+        show_memo(memos.memo);
+        attrset(COLOR_PAIR(0));
     }
 }
 

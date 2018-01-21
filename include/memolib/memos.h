@@ -49,7 +49,7 @@ Memos search_memo_by_date(Memos* memos);
 void  show_memos(Memos memos);
 
 // 選択状態でメモを表示
-void  show_memos_with_select(Memos memos, int num);
+void  show_memos_with_select(Memos memos);
 
 // タイトルだけメモ表示
 void  show_memos_title_with_select(Memos memos, int num);
