@@ -105,36 +105,69 @@ int swap_memo(Memos* memos1, Memos* memos2) {
 }
 
 Memos* search_memo_by_title(Memos memos, char* title) {
+    Memos* now;
     Memos* ret;
-    Memos* tmp;
+    Memos* tmp_now;
+    Memos* tmp_prev;
 
     ret = NULL;
+    now = &memos;
 
-    while(memos.next != NULL) {
-        if(strcmp(memos.memo.title.value, title) == 0) {
+    while(now != NULL) {
+        if(strcmp(now->memo.title.value, title) == 0) {
             if(ret == NULL){
-                tmp         = malloc(sizeof(Memos));
-                *tmp        = memos;
-                tmp->next   = NULL;
-                ret         = tmp;
+                tmp_now     = malloc(sizeof(Memos));
+                *tmp_now    = *now;
+                ret         = tmp_now;
                 ret->prev   = NULL;
+                ret->next   = NULL;
             } else {
-                tmp->next   = malloc(sizeof(Memos));
-                memos.prev  = tmp;
-                *tmp->next  = memos;
-                tmp         = tmp->next;
-                tmp->next   = NULL;
+                tmp_now->next   = malloc(sizeof(Memos));
+                tmp_prev        = tmp_now;
+                *tmp_now->next  = *now;
+                tmp_now         = tmp_now->next;
+                tmp_now->prev   = tmp_prev;
+                tmp_now->next   = NULL;
             }
         }
 
-        memos = *memos.next;
+        now = now->next;
     }
 
     return ret;
 }
 
 Memos* search_memo_by_text(Memos memos, char* text) {
-    
+    Memos* now;
+    Memos* ret;
+    Memos* tmp_now;
+    Memos* tmp_prev;
+
+    ret = NULL;
+    now = &memos;
+
+    while(now != NULL) {
+        if(strcmp(now->memo.text.value, text) == 0) {
+            if(ret == NULL){
+                tmp_now     = malloc(sizeof(Memos));
+                *tmp_now    = *now;
+                ret         = tmp_now;
+                ret->prev   = NULL;
+                ret->next   = NULL;
+            } else {
+                tmp_now->next   = malloc(sizeof(Memos));
+                tmp_prev        = tmp_now;
+                *tmp_now->next  = *now;
+                tmp_now         = tmp_now->next;
+                tmp_now->prev   = tmp_prev;
+                tmp_now->next   = NULL;
+            }
+        }
+
+        now = now->next;
+    }
+
+    return ret;
 }
 
 Memos* search_memo_by_date(Memos memos, time_t make_time_num) {
@@ -259,5 +292,9 @@ void show_memos_with_select_for_sort(Memos memos, Memos selected_memos) {
 }
 
 void free_memos(Memos* memos) {
+    if(memos->prev != NULL)
+        free_memos(memos->prev);
+    if(memos->next != NULL)
+        free_memos(memos->next);
     free_memo(&memos->memo);
 }

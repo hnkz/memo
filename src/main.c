@@ -17,7 +17,7 @@ char* filename    = "memo.sav";
 char* separator   = ",";
 
 // ヘルプ文字列
-char* help        = "操作方法 j: 下, k: 上, h: 左, l: 右, Enter: 決定, x: 表示切り替え, q: 終了";
+char* help        = "操作方法 j: 下, k: 上, h: 左, l: 右, Enter: 決定, q: 終了";
 
 // メニュー 一覧
 char* start_menus[]     = {
@@ -31,7 +31,7 @@ char* start_menus[]     = {
 // 検索できる項目
 char* search_menus[] = {
     "タイトル",
-//    "テキスト",
+    "テキスト",
 //    "作成日時",
 };
 
@@ -234,6 +234,8 @@ void print_remove_memo_window() {
                 if(selected_memos->next != NULL) {
                     list_top = list_top->next;
                     list_top->prev = NULL;
+                } else {
+                    *list_top = new_memos();
                 }
             }
             remove_memo(selected_memos);
