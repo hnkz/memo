@@ -170,8 +170,43 @@ Memos* search_memo_by_text(Memos memos, char* text) {
     return ret;
 }
 
-Memos* search_memo_by_date(Memos memos, time_t make_time_num) {
-    
+Memos* search_memo_by_date(Memos memos, struct tm tm) {
+    struct tm memo_tm;
+    Memos* now;
+    Memos* ret;
+    Memos* tmp_now;
+    Memos* tmp_prev;
+
+    ret = NULL;
+    now = &memos;
+
+    while(now != NULL) {
+        memo_tm = *localtime(&now->memo.make_time_num);
+        if(
+            tm.tm_year == memo_tm.tm_year &&
+            tm.tm_mon  == memo_tm.tm_mon  &&
+            tm.tm_mday == memo_tm.tm_mday
+        ) {
+            if(ret == NULL){
+                tmp_now     = malloc(sizeof(Memos));
+                *tmp_now    = *now;
+                ret         = tmp_now;
+                ret->prev   = NULL;
+                ret->next   = NULL;
+            } else {
+                tmp_now->next   = malloc(sizeof(Memos));
+                tmp_prev        = tmp_now;
+                *tmp_now->next  = *now;
+                tmp_now         = tmp_now->next;
+                tmp_now->prev   = tmp_prev;
+                tmp_now->next   = NULL;
+            }
+        }
+
+        now = now->next;
+    }
+
+    return ret;
 }
 
 void show_memos(Memos memos) {

@@ -32,7 +32,7 @@ char* start_menus[]     = {
 char* search_menus[] = {
     "タイトル",
     "テキスト",
-//    "作成日時",
+    "作成日時",
 };
 
 // 検索語のメニュー
@@ -410,16 +410,35 @@ void print_search_memo_window() {
 
             clear();
             echo();
-            printw("検索する[ %s ]を入力してください: ", search_menus[search_menu_status]);
-            scanw("%s", tmp_char);
 
             search_top = NULL;
-            if(search_menu_status == 0) {
-                search_top = search_memo_by_title(*list_top, tmp_char);
-            } else if(search_menu_status == 1) {
-                search_top = search_memo_by_text(*list_top, tmp_char);
-            } else if(search_menu_status == 2) {
-                search_top = search_memo_by_date(*list_top, atoi(tmp_char));
+
+            if(search_menu_status == 2) {
+                int     tmp_date;
+                time_t  time;
+                struct  tm tm = {
+                    0,0,0,0,0,0
+                };
+                printw("検索する[ %s ]を入力してください:\n", search_menus[search_menu_status]);
+                printw("年: ");
+                scanw("%d", &tmp_date);
+                tm.tm_year = tmp_date - 1900;
+                printw("月: ");
+                scanw("%d", &tmp_date);
+                tm.tm_mon = tmp_date - 1;
+                printw("日: ");
+                scanw("%d", &tmp_date);
+                tm.tm_mday = tmp_date;
+
+                search_top = search_memo_by_date(*list_top, tm);
+            } else {
+                printw("検索する[ %s ]を入力してください: ", search_menus[search_menu_status]);
+                scanw("%s", tmp_char);
+
+                if(search_menu_status == 0)
+                    search_top = search_memo_by_title(*list_top, tmp_char);
+                else if(search_menu_status == 1)
+                    search_top = search_memo_by_text(*list_top, tmp_char);
             }
 
             if(search_top != NULL) {

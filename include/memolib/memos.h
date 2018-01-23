@@ -46,7 +46,7 @@ Memos* search_memo_by_title(Memos memos, char* title);
 Memos* search_memo_by_text(Memos memos, char* text);
 
 // メモを日付で検索
-Memos* search_memo_by_date(Memos memos, time_t make_time_num);
+Memos* search_memo_by_date(Memos memos, struct tm tm);
 
 // メモを表示
 void  show_memos(Memos memos);
